@@ -1,0 +1,29 @@
+.githooks
+
+node_modules
+coverage
+
+/.next/
+
+# start: e2e #
+.auth
+playwright-report
+test-results
+# end: e2e #
+
+.DS_Store
+*.pem
+
+.env
+
+.vercel
+.claude
+
+*.tsbuildinfo
+next-env.d.ts
+
+__generated__
+
+####### 👉 remove #######
+migrations
+########################

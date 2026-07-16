@@ -1,0 +1,6 @@
+name: Setup DB
+runs:
+  using: composite
+  steps:
+    - run: pnpm db:up && pnpm db:migrate
+      shell: bash

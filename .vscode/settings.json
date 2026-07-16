@@ -1,0 +1,37 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "prettier.requireConfig": false,
+  "cSpell.enabled": true,
+  "cSpell.words": [
+    "dotenv",
+    "biomejs",
+    "otel",
+    "otlp",
+    "clsx",
+    "vitest",
+    "knip",
+    "cuid"
+  ],
+  "cSpell.allowCompoundWords": true,
+  "cSpell.ignorePaths": ["**/node_modules/**"]
+}
