@@ -10,8 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "web app template",
-  description: "😸",
+  title: "Settle a Bet",
+  description:
+    "Fun social AI arbitration for friendly wagers and online debates.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL),
   alternates: {
     canonical: process.env.NEXT_PUBLIC_SITE_URL,

@@ -1,175 +1,49 @@
-<!-- 👉 remove -->
+# Settle a Bet
 
-<div align="center">
-  <h1>️️A minimal template for web app 🎃</h1>
-  <img src=".internal/site/src/public/images/icon.png" alt="icon" width="120">
-  <p>From Zero to Service, Build with Best Practices, Minimal Code, and Essential Tools</p>
-  <br />
-  <a href="https://hiroppy.github.io/web-app-template/"target="_blank" >📜 Read The Docs 📜</a>
-  <br />
-  <br />
-</div>
+Settle a Bet is a fun social prototype for friends and online debaters who want to let a neutral AI-generated arbitration process decide an argument. The product vision intentionally supports real-money wager flows for the prototype, while making clear that this is not a serious legal arbitration tool and not a production-ready regulated betting product.
 
-Installing this template automatically sets up the following libraries/tools. By saving you significant effort, it allows you to focus entirely on writing your product code.🤗
+## Product stance
 
-|             |                                                                                                                                            |                                                                                                                                                      |                                                                                                                                       |                                                                                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **App**     | <div align="center"><img src=".internal/site/src/public/images/libs/nextjs.png" alt="nextjs" width="44"><br>Next.js</div>                  | <div align="center"><img src=".internal/site/src/public/images/libs/tailwind.png" alt="tailwind" width="44"><br>Tailwind CSS</div>                   | <div align="center"><img src=".internal/site/src/public/images/libs/next-auth.png" alt="next-auth" width="44"><br>NextAuth.js</div>   | <div align="center"><img src=".internal/site/src/public/images/libs/react-hook-form.png" alt="react-hook-form" width="44"><br>React Hook Form</div> |
-|             | <div align="center"><img src=".internal/site/src/public/images/libs/zod.svg" alt="zod" width="44"><br>Zod </div>                           | <div align="center"><img src=".internal/site/src/public/images/libs/otel.png" alt="otel" width="44"><br>OpenTelemetry</div>                          | <div align="center"><img src=".internal/site/src/public/images/libs/prisma.png" alt="prisma" width="44"><br>Prisma</div>              | <div align="center"><img src=".internal/site/src/public/images/libs/postgresql.png" alt="postgresql" width="44"><br>PostgreSQL</div>                |
-|             | <div align="center"><img src=".internal/site/src/public/images/libs/stripe.png" alt="stripe" width="44"><br>Stripe</div>                   |                                                                                                                                                      |                                                                                                                                       |
-|             |                                                                                                                                            |                                                                                                                                                      |                                                                                                                                       |
-| **Tools**   | <div align="center"><img src=".internal/site/src/public/images/libs/typescript.png" alt="typescirpt" width="44"><br>TypeScript</div>       | <div align="center"><img src=".internal/site/src/public/images/libs/pnpm.svg" alt="pnpm" width="44"><br>pnpm</div>                                   | <div align="center"><img src=".internal/site/src/public/images/libs/biome.png" alt="biome" width="44"><br>Biome </div>                | <div align="center"><img src=".internal/site/src/public/images/libs/prettier.png" alt="prettier" width="44"><br> Prettier</div>                     |
-|             | <div align="center"><img src=".internal/site/src/public/images/libs/knip.png" alt="knip" width="44"><br>Knip</div>                         | <div align="center"><img src=".internal/site/src/public/images/libs/editorconfig.png" alt="editorconfig" width="44"><br> EditorConfig </div>         | <div align="center"><img src=".internal/site/src/public/images/libs/lefthook.png" alt="lefthook" width="44"><br> lefthook</div>       | <div align="center"><img src=".internal/site/src/public/images/libs/docker.png" alt="docker" width="44"><br> Docker </div>                          |
-|             |                                                                                                                                            |                                                                                                                                                      |                                                                                                                                       |
-| **Testing** | <div align="center"><img src=".internal/site/src/public/images/libs/vitest.png" alt="vitest" width="44"><br> Vitest</div>                  | <div align="center"><img src=".internal/site/src/public/images/libs/testing-library.png" alt="testing-library" width="44"><br> Testing Library</div> | <div align="center"><img src=".internal/site/src/public/images/libs/playwright.png" alt="playwright" width="44"><br> Playwright</div> | <div align="center"><img src=".internal/site/src/public/images/libs/testcontainers.png" alt="testcontainers" width="44"><br> Testcontainers</div>   |
-|             |                                                                                                                                            |                                                                                                                                                      |
-| **Others**  | <div align="center"><img src=".internal/site/src/public/images/libs/github-actions.png" alt="actions" width="44"><br> GitHub Actions</div> | <div align="center"><img src=".internal/site/src/public/images/libs/renovate.png" alt="renovate" width="44"><br> Renovate</div>                      | <div align="center"><img src=".internal/site/src/public/images/libs/vscode.png" alt="vscode" width="44"><br> VSCode</div>             |
+- **No future or predictive bets.** Bets should be about disputes that are already resolvable. The arbitration model can reject topics that depend on future outcomes.
+- **AI-generated arbitration, not guaranteed truth.** Participants agree that the AI panel is a neutral robotic arbitrator for the game, not an infallible source of truth.
+- **Fun social use case.** The tone should feel appropriate for friends, group chats, and online debates rather than formal legal proceedings.
+- **Option D prototype.** The design keeps the full wager flow in scope: collect participant stakes, take a platform cut, and pay the winner after judgment.
 
-Please read the features provided by this template first! 👉
-[Challenges Solved](https://hiroppy.github.io/web-app-template/introduction/challenges-solved.html)
+## Intended flow
 
-## Prerequisites
+1. A creator starts a bet with a topic, number of participants, judging mode, and per-person wager.
+2. The app generates a private invite link.
+3. Each participant enters an email, submits an argument, optionally adds citations or voice transcription, and provides payment details.
+4. Before final submission, participants confirm that AI will evaluate the arguments and that the result may be wrong.
+5. Once every participant has submitted, the app locks the record and runs a multi-agent evaluation.
+6. A final judgment link is emailed to everyone with the arguments, panel votes, rationale summaries, caveats, and payout outcome.
 
-- Node.js v20 or higher
-- [Docker](https://docs.docker.com/engine/install/)
+## AI arbitration model
 
-## Installation
+The evaluation process should include several roles rather than a single one-shot model response:
 
-When installing the repository, you can skip the setup section, as the init script will do the equivalent of setup.
+- **Intake validator:** rejects predictive, unsafe, junk, nonsensical, or unresolvable bets.
+- **Factual referee:** checks claims, citations, and whether the dispute can be resolved from available evidence.
+- **Argument scorer:** evaluates clarity, relevance, evidence quality, and who satisfied the agreed rubric.
+- **Adversarial reviewer:** challenges the draft result for prompt injection, missing context, hallucinated evidence, and unfair weighting.
+- **Final arbiter:** synthesizes the panel into a social judgment, winner, confidence level, caveats, and payout instruction.
 
-### Using CLI (recommended)
+The judgment page should expose rationale summaries, citations, confidence, dissenting votes, and caveats, but should not promise raw hidden chain-of-thought.
 
-```sh
-$ npx create-app-foundation@latest
-```
+## V2 design space
 
-The CLI creates a project directory and run internal/init script so it's easy to get started.
-
-### Using GitHub Template
-
-This repo is a GitHub template, so click the ["Use this template"](https://github.com/new?template_owner=hiroppy&template_name=web-app-template) button to create your repo. Then, you need to execute the below to finish setting it up.
-
-```sh
-$ node .internal/setup/init.mjs
-```
-
-### Opt-out
-
-The following items will be asked whether they are required when the project is initialized:
-
-- Sample Application Code
-- Dockerfile
-- E2E Testing
-- Observability feature
-- Stripe
-
-<!-- ######## -->
-
-## Setup
-
-```sh
-# enable corepack
-$ npm run setup
-# install deps
-$ pnpm i
-# create ".env" and modify environment variables
-$ cp .env.sample .env
-```
+Leave room for appeals after v1 by modeling judgment runs separately from bets. Appeals may introduce new evidence, trigger a stronger panel, require an appeal fee, or overturn the original result before final payout depending on the selected policy.
 
 ## Development
 
 ```sh
-$ pnpm dev
+pnpm i
+pnpm dev
 ```
 
-<!-- start: stripe -->
-
-### Debugging Stripe
-
-1. Create a subscription [here](https://dashboard.stripe.com/test/products?active=true&create=product&source=product_list) and get `price_id`.
-
-2. Modify the environment variables. The test API key is [here](https://dashboard.stripe.com/test/apikeys).
+## Testing
 
 ```sh
-STRIPE_SECRET_KEY=
-STRIPE_PRICE_ID=
+pnpm test
+pnpm build
 ```
-
-3. [Install stripe CLI](https://docs.stripe.com/stripe-cli) to bypass the webhook.
-
-4. Execute the following command in another terminal.
-
-```sh
-$ pnpm dev:stripe
-```
-
-5. Add webhook signing secret like `whsec_...` from the cli output to env file
-
-```
-STRIPE_WEBHOOK_SECRET=whsec_...
-```
-
-6. After signing in, you can go to the `http://localhost:3000/me/payment` page to see how to make a payment.
-
-<!-- end: stripe -->
-
-## Production
-
-```sh
-$ pnpm db:up
-$ pnpm build
-$ pnpm start
-```
-
-<!-- start: otel -->
-
-### Observability
-
-This template uses Jaeger as a tracing platform. The local environment doesn't require `TRACE_EXPORTER_URL` environment value.
-
-```sh
-# open Jaeger
-$ open http://localhost:16686/
-```
-
-<!-- end: otel -->
-
-## Test
-
-### Unit Test
-
-```sh
-$ pnpm test
-$ pnpm test:watch
-```
-
-<!-- start: e2e -->
-
-### E2E Test
-
-A build task must be executed before running tests to bypass JWT logic.
-
-```sh
-# install chrome
-$ pnpm exec playwright install chrome
-
-$ pnpm build
-
-$ pnpm test:e2e
-$ pnpm test:e2e:ui
-```
-
-<!-- end: e2e -->
-
-## Database
-
-```sh
-$ pnpm db:migrate
-$ pnpm db:reset
-# view the database items
-$ pnpm db:studio
-```
-
-## Links
-
-- [Web App Template](https://hiroppy.github.io/web-app-template/)
