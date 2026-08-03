@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    "lib/generated/**",
+    ".next/**",
+    "build/**",
+    "coverage/**",
+    ".claude/skills/**",
+    ".claude/commands/**"
+  ]
+}

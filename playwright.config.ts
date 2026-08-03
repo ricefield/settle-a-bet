@@ -1,26 +1,19 @@
 import { defineConfig, devices } from "@playwright/test";
-import { config } from "./env";
-
-config();
 
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
-  projects: [
-    {
-      name: "setup",
-      testMatch: /.\/e2e\/setup\/.*.ts/,
-    },
-    {
-      name: "chrome",
-      use: {
-        ...devices["Desktop Chrome"],
-        headless: true,
-        launchOptions: {
-          args: [],
-        },
-      },
-      dependencies: ["setup"],
-    },
-  ],
+  retries: process.env.CI ? 2 : 0,
+  reporter: process.env.CI ? "github" : "list",
+  use: {
+    baseURL: "http://127.0.0.1:3100",
+    trace: "retain-on-failure",
+  },
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  webServer: {
+    command: "bun run dev --hostname 127.0.0.1 --port 3100",
+    url: "http://127.0.0.1:3100/bets/new",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });
