@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues are tracked in GitHub Issues for `ricefield/settle-a-bet`. See `docs/agents/issue-tracker.md`.
+Issues are tracked in GitHub Issues for `tower-research-ventures/settle-a-bet`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

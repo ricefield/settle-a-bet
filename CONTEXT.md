@@ -1,117 +1,109 @@
 # Settle a Bet
 
-Settle a Bet lets a small group submit a voluntary, low-stakes disagreement to an independent panel of AI Judges and receive a public, evidence-backed Judgment.
+Settle a Bet lets a small group submit a voluntary, nominal-stakes disagreement to a heterogeneous panel of AI Judges and receive a public, evidence-backed Judgment.
 
-## Cases and participation
+## Participation
 
-**Case**:
-A disagreement that Participants submit for evaluation under one agreed Decision Frame.
-_Avoid_: Bet, dispute
+**Bet**:
+A disagreement that named Participants submit under one shared Decision Frame and nominal per-person Stake.
+_Avoid_: Case, dispute
 
 **Creator**:
-The Participant who starts a Case, defines its initial framing, and submits before inviting anyone else.
+The Participant who creates a Bet and commits the first sealed Submission.
 _Avoid_: Owner, host
 
 **Participant**:
-A person who accepts a Case's Decision Frame by submitting one sealed Position and Submission.
+A named person who consents to publication and commits one sealed Position and Submission.
 _Avoid_: User, bettor, contestant
 
+**Participant Slot**:
+One reserved place in a Bet, represented before submission by a private bearer Invitation.
+_Avoid_: Seat, account
+
+**Organizer Link**:
+The private bearer link that lets the Creator recover Invitations, see completion status, cancel an open Bet, and reach the result.
+_Avoid_: Admin link, account
+
+**Invitation**:
+A private bearer link that permits exactly one immutable Participant Submission.
+_Avoid_: Login, invitation account
+
 **Decision Frame**:
-The approved question, definitions, scope, judging standard, assumptions, and exclusions that govern a Case.
-_Avoid_: Prompt, topic, premise
+The exact question, context, judging criteria, assumptions, and exclusions governing a Bet.
+_Avoid_: Prompt, topic
 
 **Position**:
-A Participant's concise answer to the question established by the Decision Frame.
-_Avoid_: Side, answer
+A Participant's concise answer to the Decision Frame.
+_Avoid_: Side, vote
 
 **Submission**:
-A Participant's sealed explanation and supporting public sources for their Position.
-_Avoid_: Argument, evidence
+A Participant's sealed explanation and supporting public sources for a Position.
+_Avoid_: Argument, evidence packet
 
-**Case Lock**:
-The point at which every expected Participant has submitted and no Position or Submission may change.
+**Bet Lock**:
+The point at which every Participant Slot has a Submission and the Bet becomes immutable and ready for evaluation.
 _Avoid_: Close, finalization
 
-**Sincerity Review**:
-The private operator review of a locked Case to decide whether its Participants made a genuine attempt to address the Decision Frame.
-_Avoid_: Quality review, argument grading
+**Stake**:
+The nominal per-person USD amount attached to a Bet for display only; the product never collects or pays it.
+_Avoid_: Payment, balance
 
 ## Evaluation
 
+**Research Contribution**:
+One Judge model's blind, two-sided research into every Position, including supporting and contrary evidence, weaknesses, and unresolved questions.
+_Avoid_: Private research, advocacy
+
 **Position Map**:
-The transparent mapping from original Positions to materially equivalent normalized Positions.
-_Avoid_: Clustering, answer grouping
+The grouping of materially equivalent Positions used as vote targets when at least two Judge models propose the same complete grouping.
+_Avoid_: Clustering, answer rewrite
 
 **Research Record**:
-The shared body of sourced research, strongest cases, weaknesses, and unresolved conflicts prepared before judging.
-_Avoid_: Evidence packet, research summary
-
-**Position Researcher**:
-An AI research role that develops the strongest supported case for one normalized Position while recording its weaknesses.
-_Avoid_: Advocate, Judge
-
-**Cross-Examiner**:
-An AI research role that compares Position research, challenges unsupported claims, and identifies unresolved conflicts before judging.
-_Avoid_: Judge, Synthesizer
+The frozen, shared collection of all three attributed Research Contributions, their sources, and the Position Map.
+_Avoid_: Synthesized evidence, private dossier
 
 **Judge**:
-An independently run AI model that researches the Case, evaluates every Position, and casts one sealed Vote.
+One pinned model in the heterogeneous Judge Panel that contributes research and later casts one sealed Vote from the shared Research Record.
 _Avoid_: Agent, arbiter
 
-**Panel Policy**:
-The product-wide rules that automatically select the three Judges used for an evaluation.
-_Avoid_: Case-specific panel, judge selection
-
 **Judge Panel**:
-The three Judges selected automatically under the product-wide Panel Policy for a Case.
-_Avoid_: Jury, model ensemble
+The required panel consisting of one Claude Opus model, one OpenAI Sol model, and one Grok model.
+_Avoid_: Jury, configurable panel
 
 **Judicial Opinion**:
-A Judge's structured explanation of its interpretation, decisive considerations, evidence, counterarguments, uncertainty, and Vote.
-_Avoid_: Chain of thought, analysis
+A Judge's public explanation of its interpretation, decisive considerations, evidence, counterarguments, uncertainty, and Vote.
+_Avoid_: Chain of thought, hidden reasoning
 
 **Vote**:
-A Judge's selection of one normalized Position or one non-prevailing Verdict type.
+A Judge's selection of one Position Map group or one non-prevailing Verdict type.
 _Avoid_: Score, recommendation
 
 **Verdict**:
-The mechanically aggregated result of the Judge Panel's sealed Votes.
-_Avoid_: Judgment, answer
-
-**Synthesizer**:
-The AI reporter that explains the locked Verdict and preserves majority and dissenting Judicial Opinions without changing the result.
-_Avoid_: Final Judge, tie-breaker
+The mechanically aggregated result of the three sealed Votes.
+_Avoid_: Judgment, synthesis
 
 **Judgment**:
-The immutable public record containing the Decision Frame, anonymized Positions and Submissions, Research Record, Judicial Opinions, Verdict, synthesis, citations, and Transparency Record.
+The immutable public record containing the named Participants, Decision Frame, Submissions, nominal Stake, Research Record, Judicial Opinions, Verdict, synthesis, citations, and Transparency Record.
 _Avoid_: Verdict, result page
 
 **Transparency Record**:
-The public provenance record of the models, configurations, prompts, searches, sources, outputs, retries, failures, and available reasoning artifacts used to produce a Judgment.
+The public provenance of model identities, prompts, model-visible inputs, searches, sources, outputs, retries, usage, failures, and aggregation rules used for a Judgment.
 _Avoid_: Raw chain of thought, audit summary
 
 ## Outcomes
 
 **Position Prevails**:
-A Verdict in which at least two Judges select the same normalized Position.
+A Verdict in which at least two Judges select the same Position Map group.
 
 **No Material Disagreement**:
-A Verdict in which at least two Judges conclude that the submitted Positions are substantively compatible or equivalent.
+A Verdict in which at least two Judges conclude that the submitted Positions are substantively compatible.
 
 **No Submitted Position Prevails**:
-A Verdict in which at least two Judges conclude that every submitted Position is materially flawed; the Judgment may include a synthesized alternative conclusion.
+A Verdict in which at least two Judges conclude that every submitted Position is materially flawed.
 
 **Indeterminate**:
-A Verdict in which at least two Judges find the Case responsibly undecidable, or no two valid Votes align.
-
-**Ineligible**:
-A Case outcome indicating that the subject is outside the product's permitted low-stakes scope and must not receive a substantive Verdict.
-_Avoid_: Rejected
-
-**Rejected**:
-A private operator decision not to evaluate a locked Case after Sincerity Review.
-_Avoid_: Ineligible, failed
+A Verdict in which at least two Judges choose Indeterminate or no two valid Votes align.
 
 **Evaluation Failed**:
-A technical outcome indicating that the required Judge Panel could not produce three valid Votes.
-_Avoid_: Indeterminate, Rejected
+A technical outcome indicating that the required Judge Panel could not produce three valid Votes without model substitution.
+_Avoid_: Indeterminate, rejected

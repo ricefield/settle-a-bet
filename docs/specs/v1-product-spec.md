@@ -1,404 +1,162 @@
-# Settle a Bet V1 Product Specification
+# Settle a Bet MVP Product Specification
 
-Status: Draft for team review
-
-The v1 product definition is agreed, but the team has not chosen whether direct web initiation or X-assisted initiation should be delivered first. Both paths are specified here and share the same Case workflow.
+Status: Approved for implementation
 
 ## Product promise
 
-Settle a Bet gives friends, small social groups, and internet strangers a procedurally fair way to settle voluntary, low-stakes subjective disagreements. Participants submit sealed Positions and context. A heterogeneous panel of AI Judges independently researches the merits of those Positions, casts auditable Votes, and produces an anonymized public Judgment.
+Settle a Bet gives 2–4 named Participants a procedurally consistent way to settle a voluntary, low-stakes disagreement. Every Participant submits a sealed Position and explanation. Claude Opus, OpenAI Sol, and Grok each contribute blind, two-sided research to one shared record, independently vote from that same evidence, and produce a public, auditable Judgment.
 
-The product promises an independent panel and a consistent process. It does not promise that any model is unbiased, objectively correct, or suitable for consequential decisions.
+The product promises a transparent process and provider-diverse panel. It does not promise objective correctness and must not be used for consequential medical, legal, financial, employment, safety, or reputational decisions.
+
+The Stake is nominal. No money is collected, held, transferred, or paid.
 
 ## Goals
 
-- Turn an informal disagreement into a clear, mutually accepted Decision Frame.
-- Judge the merits of Positions rather than participants' writing or debating skill.
-- Research and steelman every Position symmetrically.
-- Make the resulting Verdict mechanically determined and inspectable.
-- Produce a useful, shareable public Judgment.
-- Support direct web and X-assisted initiation through one Case workflow.
-- Measure whether all sides, especially non-prevailing Participants, felt the process was fair.
+- Turn an informal disagreement into an exact, shared Decision Frame.
+- Keep Participant Submissions sealed until publication.
+- Give every Position symmetric research resources.
+- Ensure all three required Judge models contribute to one shared Research Record.
+- Make the Verdict mechanical, reproducible, and inspectable.
+- Produce a useful public Judgment that names consenting Participants.
+- Keep creation and participation account-free.
 
 ## Non-goals
 
-- Holding wagers, charging fees, authorizing cards, or paying winners.
-- Objective fact-checking as the primary product.
-- High-stakes medical, legal, financial, employment, safety, or reputational decisions.
-- Accusations about identifiable people or decisions affecting non-consenting people.
-- Rebuttal rounds or appeals.
-- Private Judgments.
-- Public comments, reactions, profiles, rankings, or algorithmic feed ranking.
-- File, image, audio, video, or PDF evidence uploads.
-- Verifying Reddit or X identities for ordinary web-originated Cases.
+- Authentication, accounts, email, notifications, profiles, or private Judgments.
+- Payments, balances, escrow, fees, or payouts.
+- X or other social-network integrations.
+- AI-assisted framing, rebuttal rounds, appeals, or comments.
+- Manual approval before evaluation.
+- File, image, audio, video, or PDF uploads.
 
-## Audience and scope
+## Creation and participation
 
-V1 serves 2 to 4 Participants, including the Creator. Typical Cases originate in an in-person conversation, group chat, Reddit thread, or X conversation. Participation is voluntary, and submitting constitutes acceptance of the exact Decision Frame and public publication terms.
+The Creator provides:
 
-V1 is limited to relatively low-stakes debates and opinions. A Case is Ineligible when a substantive Judgment could materially affect someone's safety, rights, reputation, health, finances, or livelihood, or when meaningful anonymization is impossible.
+- A title up to 120 characters.
+- The exact question or premise up to 500 characters.
+- Context, criteria, assumptions, and exclusions up to 2,000 words.
+- A total Participant count from 2 to 4, including the Creator.
+- A whole-dollar per-person nominal Stake from $1 to $10,000.
+- Their required public name, Position, Submission, and up to five HTTPS source URLs.
+- Explicit consent to public publication and acknowledgement that no money is processed.
 
-## Shared Case lifecycle
+Creation commits the Creator's Submission atomically and returns:
 
-### 1. Frame the Case
+- One private Organizer Link.
+- One private, one-use Invitation for every remaining Participant Slot.
 
-The Creator enters an informal question or premise and selects a total Participant count from 2 to 4.
+The organizer view can recover Invitations, display slot completion without revealing sealed content, cancel an open Bet, and later open the Judgment.
 
-A framing assistant proposes a Decision Frame containing:
+An invited Participant reviews the immutable Decision Frame and Stake, then provides a required public name, Position, Submission, up to five HTTPS sources, and publication consent. The product shows an explicit preview before the one-shot submission. A successful submission cannot be revised, withdrawn, or replaced.
 
-- The precise question to decide
-- Defined terms and scope
-- The judging standard
-- Important assumptions
-- Explicit exclusions
+Positions are limited to 280 characters and Submissions to 1,500 words. Until publication, Participants cannot inspect anyone else's Position or Submission. The Creator has no privileged access to sealed content.
 
-The Creator may edit the proposal and must approve the final Decision Frame. The framing assistant never changes it silently.
+There is no submission deadline. The Creator may cancel only while the Bet is open. The final Participant Submission locks the Bet and starts or queues evaluation exactly once.
 
-### 2. Commit the Creator
+## Evaluation
 
-Before invitations are available, the Creator must:
+Evaluation runs durably and exposes stable progress without streaming provisional conclusions.
 
-- Verify an email address
-- State one concise Position
-- Enter a sealed Submission
-- Confirm the Decision Frame and publication terms
+### Research
 
-Voice input is a drafting aid only. The Creator receives an editable transcript and ultimately submits text. Raw audio is not sent to Judges and should be deleted after transcription or abandonment of the draft.
+1. Replace names with stable labels Participant A through Participant D.
+2. Give the same Decision Frame and sealed Submissions to pinned Claude Opus, OpenAI Sol, and Grok models.
+3. Run all three research calls concurrently and blind. No model sees another model's contribution.
+4. Each model researches every Position with the same search and output limits. It must include supporting evidence, contrary evidence, weaknesses, unresolved questions, citations, and a proposed complete Position Map.
+5. Use low reasoning effort, low search context, and no more than five retrieved results per contribution.
+6. Preserve each contribution with provider attribution. Build a shared source index by normalizing and deduplicating URLs; do not ask another model to rewrite the evidence.
+7. Use a proposed Position Map only when at least two models return the same complete partition. Otherwise every original Position remains a separate vote target.
+8. Serialize and freeze the resulting Research Record.
 
-### 3. Invite Participants
+### Judging
 
-The Case receives bearer invitation links for its remaining slots. An invitee verifies an email address through a magic link, claims a slot, reviews the Decision Frame, and submits a sealed Position and Submission.
+1. Give the identical frozen Research Record, Decision Frame, anonymized Submissions, and Position Map to all three Judges.
+2. Run the three calls concurrently and blind with no web or other tools.
+3. Each Judge returns one structured Vote and Judicial Opinion using medium reasoning effort.
+4. A Judicial Opinion states its interpretation, decisive considerations, strongest evidence, strongest counterargument, uncertainty, and limitations without exposing hidden chain of thought.
 
-No account or password is required. Social identity verification is outside the ordinary web flow.
+Valid Votes are:
 
-Positions and Submissions are hidden from every other Participant until the Case locks. A Participant may revise or withdraw while the Case remains open. The latest confirmed version is authoritative.
+- One Position Map group.
+- No Material Disagreement.
+- No Submitted Position Prevails.
+- Indeterminate.
 
-### 4. Lock or expire
+Two matching Votes determine the Verdict. If no two valid Votes align, the Verdict is Indeterminate. Confidence or prose cannot override Votes.
 
-The Case locks immediately when every expected Participant has submitted. The Decision Frame, Positions, and Submissions then become immutable.
+### Synthesis
 
-The default submission deadline is 72 hours. If the roster is incomplete at the deadline:
+A pinned, low-cost OpenAI Luna model may explain the locked result but cannot choose or alter it. The output is accepted only when its encoded Verdict matches the mechanical aggregation. After repeated synthesis failure, publish a deterministic summary instead.
 
-- The Case expires without evaluation.
-- Sealed content remains private.
-- The Creator may start a new Case with a different roster.
+### Failure
 
-The platform never silently removes a missing Participant and evaluates a different roster.
+Every malformed or failed provider call is retried up to three times using the exact same model and configuration. OpenRouter auto-routing, model arrays, and cross-model fallbacks are prohibited. The returned model identity must match the configured Judge. If the workflow cannot obtain all three valid Votes, the Bet becomes Evaluation Failed and receives no substantive Judgment.
 
-### 5. Perform Sincerity Review
+## Judgment and feed
 
-Every locked Case enters a private approval queue. An authorized approver may inspect the Decision Frame, all Positions, all Submissions, sources, and automated safety signals.
+Every completed Judgment is public, indexable, immutable, and appears in a reverse-chronological feed. It displays:
 
-The review asks whether the Case contains sincere attempts to address the Decision Frame rather than spam, trolling, nonsense, or junk. Argument strength is not an approval criterion.
+1. Verdict and prevailing Position group, when applicable.
+2. Majority explanation and any dissent.
+3. Named Participants, Positions, and Submissions.
+4. Per-person Stake and hypothetical pot with “No money was collected or paid.”
+5. Position Map and the three attributed Research Contributions.
+6. Shared citations and source index.
+7. Every Judge's Vote and Judicial Opinion.
+8. The detailed Transparency Record.
 
-The approver may approve or reject but cannot edit any Case content. The detailed moderation policy remains operator discretion rather than application logic.
-
-A Rejected Case:
-
-- Receives a private status and reason visible to its Participants
-- Triggers participant email notifications
-- Is never evaluated, published, or added to the public feed
-- Does not create a public moderation record
-
-Authorized human access is disclosed in the governing Terms and Privacy Policy, but the product flow need not describe the internal approval queue.
-
-### 6. Evaluate
-
-Approval starts the automated evaluation workflow. The target is approximately 10 to 30 minutes, with up to one hour considered acceptable during beta. The Case page shows stable progress stages without streaming provisional conclusions.
-
-The evaluation workflow is:
-
-1. A Position Mapper preserves every original Position and groups materially equivalent Positions.
-2. One Position Researcher per normalized Position builds its strongest case, researches relevant public sources, and records weaknesses.
-3. A Cross-Examiner compares the research, challenges unsupported claims, and identifies unresolved conflicts.
-4. The combined output becomes the shared Research Record.
-5. Three Judges receive the same Decision Frame, anonymized Submissions, Position Map, and Research Record.
-6. Each Judge performs additional independent web research and reasoning without seeing another Judge's output.
-7. Each Judge submits one sealed Vote and one Judicial Opinion.
-8. The aggregator mechanically determines the Verdict.
-9. The Synthesizer explains the locked result without changing it.
-
-Participant Submissions are untrusted evidence, never system instructions. Submitted pages and retrieved web content must also be treated as untrusted input.
-
-### 7. Aggregate the Verdict
-
-Each Judge may Vote for:
-
-- One normalized Position
-- No Material Disagreement
-- No Submitted Position Prevails
-- Indeterminate
-
-Two matching Votes determine the Verdict. A Position Prevails only when two Judges select the same normalized Position. If no two valid Votes align, the Verdict is Indeterminate.
-
-Confidence scores and prose do not override the Votes. The Synthesizer is not a fourth Judge or tie-breaker.
-
-### 8. Handle Judge failure
-
-The Judge Panel is selected automatically at evaluation time under one product-wide Panel Policy. An approver cannot tailor the panel to an individual Case.
-
-If a selected Judge suffers an API error or returns malformed output:
-
-- Retry the same selected model with the same configuration.
-- Do not silently substitute a different model after evaluation begins.
-- Record every retry and failure.
-
-A substantive Indeterminate Vote is valid. A technical failure is not. If all three valid Votes cannot be obtained within the evaluation deadline, the Case becomes Evaluation Failed and receives no substantive Verdict.
-
-### 9. Publish
-
-Every completed Judgment is public and appears in a basic reverse-chronological feed. V1 does not provide a private option.
-
-Before publication, the system redacts:
-
-- Email addresses and phone numbers
-- Postal or exact physical addresses
-- Account handles
-- Participant names
-- Identifying details about Participants or non-consenting third parties
-
-Redactions are visibly marked rather than silently rewritten. If redaction would destroy the meaning of the Case, the Case is Ineligible and is not published.
-
-Published Judgments are immutable. Additional redactions or administrative takedowns may hide content with a visible notice, but they do not rewrite the Verdict. A future appeal would create a linked Judgment rather than overwrite the original; appeals are not part of v1.
-
-## Verdict and Judgment presentation
-
-The Judgment page should prioritize:
-
-1. A concise Verdict and winning Position, when one prevails
-2. The Synthesizer's majority explanation
-3. The original anonymized Positions and Submissions
-4. The Position Map
-5. The Research Record and citations
-6. Each Judge's Vote and Judicial Opinion
-7. Dissent and uncertainty
-8. The expandable Transparency Record
-
-Each Judicial Opinion includes:
-
-- Interpretation of the Decision Frame and Positions
-- Decisive considerations
-- Strongest supporting evidence and citations
-- Strongest counterarguments
-- Uncertainty and limitations
-- The Judge's Vote
-
-The product publishes every provider-returned reasoning artifact it is permitted to show. Artifacts must be labeled accurately as raw reasoning, summarized reasoning, encrypted or unavailable reasoning, or a requested Judicial Opinion. The product must never manufacture a narrative and label it raw chain of thought.
+Private bearer pages are noindex, no-store, and no-referrer. Public pages are unavailable until publication. A report link is available on every Judgment. A deployment-secret-protected takedown can hide content behind a notice without rewriting the Verdict.
 
 ## Transparency Record
 
-The completed Judgment discloses:
+Publish:
 
-- Exact model providers, identifiers, and versions
-- Model and tool configurations
-- System instructions, judging rubric, and prompt versions
-- Anonymized model-visible inputs
-- Search queries, retrieved sources, citations, and retrieval times
-- Provider-returned outputs and available reasoning artifacts
-- API response identifiers and timestamps where available
-- Retries, failures, and substitutions
-- Aggregation-policy version and the three locked Votes
+- Requested and returned model identifiers.
+- Model, prompt, and aggregation-policy versions.
+- Anonymized model-visible inputs.
+- Search queries, retrieved sources, citations, and retrieval times.
+- Research Contributions, Judicial Opinions, Votes, synthesis, and available provider outputs.
+- API response identifiers and timestamps.
+- Retries, failures, token usage, and estimated cost.
+- The frozen Research Record hash received by every Judge.
 
-The public Transparency Record does not include Sincerity Review approval activity. Approval and rejection actions should remain in a private operational audit record.
+Never claim hidden reasoning is available and never manufacture text labeled as raw chain of thought.
 
-## Initiation path A: direct web
+## Architecture
 
-The direct web adapter begins on the product website:
+One deep Bet module owns creation, slots, bearer authorization, submission, locking, cancellation, evaluation state, Position Map consensus, Vote aggregation, stake calculations, and publication. Web pages, Prisma/Postgres, Vercel Workflow, and OpenRouter are adapters at its seams.
 
-1. The Creator selects "Create a Case."
-2. The website guides framing and Creator submission.
-3. The website issues invitation links.
-4. Invitees complete the shared web participation flow.
-5. Participants receive status and result emails.
-6. The public Judgment and feed are web-hosted.
+The only model/search credential is `OPENROUTER_API_KEY`. Initial pinned model IDs are:
 
-The web experience also includes:
+- `anthropic/claude-opus-5`
+- `openai/gpt-5.6-sol`
+- `x-ai/grok-4.5`
+- `openai/gpt-5.6-luna` for synthesis only
 
-- Public feed
-- Public Judgment pages
-- Participant status pages
-- Authenticated resume links
-- Private feedback capture
-- Administrative Sincerity Review queue
-- Evaluation operations and failure inspection
+Model upgrades require an explicit configuration change. Prompt and model versions are retained with each Evaluation Run.
 
-## Initiation path B: X-assisted web
+Bearer tokens are high entropy. Verification uses hashes; recoverable Invitation material is encrypted at rest with a separate server-side key.
 
-The X adapter begins in an existing public X conversation:
+## Cost and abuse controls
 
-1. A user mentions the product's X account and identifies intended Participants.
-2. The X adapter receives the mention through the official X API.
-3. The bot sends one public acknowledgment asking the Creator to initiate a DM.
-4. After the Creator DMs the bot, it returns a signed setup link tied to the originating post.
-5. The Creator completes the standard web framing and Submission flow.
-6. Intended Participants initiate a DM with the bot or receive a web invitation from the Creator.
-7. Every Participant completes the standard web Position and Submission form.
-8. The shared Case lifecycle runs unchanged.
-9. The bot quote-posts the originating conversation with a concise Verdict and public Judgment link.
-
-An additional in-thread result reply is best-effort and must comply with X automation policy. The canonical automated result post is the quote post.
-
-X-originated Cases are anonymized on the Judgment page, but posting back to the originating public conversation can contextually identify Participants. The web submission confirmation must make this channel-specific publication behavior clear.
-
-The X adapter must use the official API and respect current automation, DM, reply, rate-limit, and paid-access requirements. It must not use scraping or browser automation. A valid X username contains only letters, numbers, and underscores and is at most 15 characters; a handle such as `@SettleABet` is structurally valid if available.
-
-## Shared architecture
-
-The application has one deep Case module with a channel-neutral interface. The module owns:
-
-- Decision Frame approval
-- Participant capacity and slot claims
-- Position and Submission revision
-- Case Lock and expiration
-- Sincerity Review transitions
-- Evaluation orchestration
-- Vote aggregation
-- Verdict and Judgment publication
-- Feedback eligibility
-
-```mermaid
-flowchart LR
-    Web["Direct web adapter"] --> Case["Case module"]
-    X["X adapter"] --> Case
-    Admin["Administration adapter"] --> Case
-    Case --> Evaluation["Evaluation module"]
-    Case --> Publication["Notification and publication module"]
-    Publication --> Email["Email adapter"]
-    Publication --> Feed["Public web feed"]
-    Publication --> X
-```
-
-The web, X, and administration experiences are adapters at the Case module seam. They translate channel-specific input into Case operations and present returned state, but they do not implement lifecycle rules.
-
-True external dependencies sit behind internal seams with production and test adapters:
-
-- AI model providers
-- Web search and retrieval
-- Email delivery
-- Voice transcription
-- X
-
-Tests should exercise Case behavior through the same interface used by adapters. Model, search, email, transcription, and X tests use controlled adapters so lifecycle behavior does not depend on live external systems.
-
-The existing Stripe template code is not part of v1 product behavior. Payment and wager concepts must not enter the Case module until a later legal, operational, and payment-provider design is approved.
-
-## Input limits
-
-Initial configurable limits are:
-
-- 5,000 words per Submission
-- 10 submitted public URLs per Participant
-- 15 minutes per voice recording
-- 2 to 4 Participants per Case
-- 72 hours to complete the roster
-
-These are operational defaults, not permanent domain invariants.
-
-## Notifications
-
-Email notifications should cover:
-
-- Email verification and participant-slot claim
-- Submission confirmation
-- Deadline reminder
-- Case expiration
-- Case rejection and private reason
-- Evaluation start
-- Judgment publication
-- Evaluation failure
-- Fairness-feedback request and one reminder
-
-X-assisted Cases may send equivalent status DMs only after the user has initiated a DM and only where platform policy permits.
-
-## Feedback and success measurement
-
-After publication, each Participant receives a private one-click question asking whether the process felt fair, followed by an optional comment. Send one reminder after 24 hours to non-responders.
-
-Participant feedback is not displayed on the public Judgment.
-
-The primary success metric is the percentage of completed Cases where:
-
-- A majority of responding Participants rate the process as fair, and
-- At least one Participant whose Position did not prevail rates the process as fair
-
-Secondary metrics include:
-
-- Invitation claim rate
-- Roster completion rate
-- Approval and rejection rates
-- Evaluation completion and failure rates
-- Median time from approval to Judgment
-- Repeat Case creation
-- Judgment visits and shares
-
-## Security, privacy, and abuse requirements
-
-- Keep participant emails separate from public Judgment content.
-- Use high-entropy, expiring magic links and invitation tokens.
-- Prevent one verified email from claiming multiple slots in the same Case.
-- Rate-limit creation, verification, transcription, invitation claims, and public endpoints even though product-level Case creation is unlimited.
-- Treat Submissions, URLs, retrieved pages, and X payloads as untrusted input.
-- Defend model prompts and tools against prompt injection.
-- Never expose model-provider credentials or private operational records.
-- Record administrative reads and moderation actions privately.
-- Preserve an auditable link between original content, redacted public content, and published citations.
-- Provide reporting and takedown paths for privacy or safety issues.
+- Limit creation to five Bets per IP hash per hour.
+- Allow at most twenty evaluations per UTC day by default.
+- Queue locked Bets in FIFO order when daily capacity is exhausted.
+- Bound model output, reasoning effort, search context, and retrieved results.
+- Record usage and estimated cost for every model call.
+- Configure an OpenRouter account spending limit as the final failsafe.
+- Treat Submissions and retrieved content as untrusted input and defend prompts against instruction injection.
 
 ## Acceptance criteria
 
-The shared Case workflow is ready when:
-
-- A 2-to-4-person Case can be framed, joined, revised, locked, reviewed, evaluated, and published.
-- No Participant can inspect another sealed Position or Submission before Case Lock.
-- Rejected and expired Cases never reach model providers or the public feed.
-- Equivalent Positions can be grouped without losing original wording.
-- Every normalized Position receives equal research resources.
-- Each Judge researches and Votes independently.
-- Two matching Votes mechanically determine the Verdict.
-- The Synthesizer cannot alter the Verdict.
-- Evaluation failure cannot be mistaken for Indeterminate.
-- Published content is anonymized and visibly redacted.
-- The Judgment exposes the required provenance and available reasoning artifacts.
-- Automated feedback is private and attributable to the Participant's outcome.
-
-The direct web path is ready when a Creator can initiate the full workflow without X.
-
-The X-assisted path is ready when a valid mention can create a secure handoff into the same web workflow and the completed Judgment can be posted back through the official X API.
-
-## Initiation-path sequencing
-
-Both initiation paths require the channel-independent Case module, web-based framing and Submission forms, administrative review, evaluation workflow, public Judgment pages, and public feed. The sequencing decision concerns which Creator acquisition path is completed and validated first.
-
-| Option | What is prioritized | Advantages | Risks |
-| --- | --- | --- | --- |
-| Direct web first | Website creation, email invitations, and direct sharing | Fewer external dependencies; validates the complete Case workflow directly; simpler debugging and testing | Distribution must be created outside the product; may under-test the social-thread use case |
-| X-assisted first | Mention detection, DM handoff, thread-linked creation, and result posting | Tests the strongest distribution loop and the internet-stranger use case early | Still requires the shared web forms; adds paid API, policy, webhook, rate-limit, and account-suspension dependencies |
-
-The team should choose using four criteria:
-
-- Which acquisition hypothesis is most important to validate first
-- Whether approved X API access and budget are available
-- Whether the team wants external-platform risk on the first critical path
-- Whether early testers will primarily arrive through direct invitations or public social debates
-
-## Open decisions
-
-- Which initiation path is delivered first
-- Final product name and X handle
-- The internal Panel Policy's initial providers and model-selection rules
-- Exact model, search, and reasoning budgets
-- Submission-deadline configuration beyond the 72-hour default
-- Sincerity Review operating guidelines and staffing
-- The threshold for moving from manual approval to more automated moderation
-- Whether future versions add private Cases, larger rosters, rebuttals, or appeals
-- Whether and how a legally compliant wager and payout capability is introduced
-
-## External platform constraints
-
-- [X API overview](https://docs.x.com/x-api/overview)
-- [X developer automation guidelines](https://docs.x.com/developer-guidelines)
-- [X Account Activity API](https://docs.x.com/x-api/account-activity/introduction)
-- [X username rules](https://help.x.com/en/managing-your-account/x-username-rules)
-- [OpenAI on hidden chain of thought](https://openai.com/index/learning-to-reason-with-llms/)
-- [Claude extended thinking](https://platform.claude.com/docs/en/docs/build-with-claude/extended-thinking)
-- [xAI reasoning documentation](https://docs.x.ai/developers/model-capabilities/text/reasoning)
+- A 2–4 Participant Bet can be created, joined through unique links, locked, evaluated, and published without an account.
+- The Creator submits during creation; every later Participant gets one immutable submission.
+- No Participant can inspect another sealed Submission before publication.
+- Names are present publicly but absent from every model-visible input.
+- All three pinned model families contribute blind research under equal limits.
+- All Judges receive the exact same Research Record hash and have no web access while voting.
+- Two matching Votes mechanically determine the Verdict; the Synthesizer cannot change it.
+- A model failure cannot be mistaken for an Indeterminate substantive Vote.
+- The Judgment exposes citations, opinions, votes, model provenance, retries, usage, and cost.
+- Stripe, payment processing, authentication, email, uploads, voice, approval, and X are absent.
