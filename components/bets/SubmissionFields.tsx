@@ -46,7 +46,10 @@ export function SubmissionFields({
         />
       </div>
       <div className="field field-full">
-        <label htmlFor="position">Concise Position</label>
+        <div className="field-label-row">
+          <label htmlFor="position">Your answer</label>
+          <span>{value.position.length}/280</span>
+        </div>
         <textarea
           id="position"
           className="input"
@@ -55,12 +58,10 @@ export function SubmissionFields({
           value={value.position}
           onChange={(event) => update("position", event.target.value)}
         />
-        <small>
-          {value.position.length}/280 characters. State the answer you want the panel to choose.
-        </small>
+        <small>Keep it direct. This is the answer the panel can pick.</small>
       </div>
       <div className="field field-full">
-        <label htmlFor="submission">Submission</label>
+        <label htmlFor="submission">Make your case</label>
         <textarea
           id="submission"
           className="input"
@@ -69,10 +70,12 @@ export function SubmissionFields({
           value={value.submission}
           onChange={(event) => update("submission", event.target.value)}
         />
-        <small>Up to 1,500 words. Make the strongest self-contained case for your Position.</small>
+        <small>Up to 1,500 words. Explain why your answer should win.</small>
       </div>
       <div className="field field-full">
-        <label htmlFor="sources">Public sources</label>
+        <label htmlFor="sources">
+          Links that back you up <span className="optional">Optional</span>
+        </label>
         <textarea
           id="sources"
           className="input"
@@ -80,7 +83,7 @@ export function SubmissionFields({
           value={value.sourceUrlsText}
           onChange={(event) => update("sourceUrlsText", event.target.value)}
         />
-        <small>Optional. One HTTPS URL per line, up to five.</small>
+        <small>One public HTTPS link per line, up to five.</small>
       </div>
       <label className="checkbox field-full">
         <input
@@ -90,7 +93,7 @@ export function SubmissionFields({
           required
         />
         <span>
-          I consent to my name, Position, Submission, and sources becoming public with the Judgment.
+          My name, answer, explanation, and links can be public when the result is posted.
         </span>
       </label>
       <label className="checkbox field-full">
@@ -100,9 +103,7 @@ export function SubmissionFields({
           onChange={(event) => update("nominalStakeAcknowledgement", event.target.checked as true)}
           required
         />
-        <span>
-          I understand that the stake is hypothetical. No money will be collected or paid.
-        </span>
+        <span>This stake is just for fun. No money will be collected or paid.</span>
       </label>
     </>
   );

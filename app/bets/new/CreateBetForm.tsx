@@ -34,7 +34,7 @@ function errorMessage(body: unknown): string {
     const error = (body as { error?: { message?: unknown } }).error;
     if (typeof error?.message === "string") return error.message;
   }
-  return "We could not create this Bet. Please check the form and try again.";
+  return "We couldn’t create this bet. Check the details and try again.";
 }
 
 export function CreateBetForm() {
@@ -77,25 +77,30 @@ export function CreateBetForm() {
 
   if (result) {
     return (
-      <div className="card stack">
+      <div className="success-panel">
         <div className="notice success">
-          <strong>Bet created.</strong> Save the organizer link now; it cannot be recovered later.
+          <strong>Your bet is live.</strong> Save your dashboard link now—we can’t recover it later.
         </div>
         <div className="links">
-          <h3>Organizer link</h3>
+          <div className="section-title">
+            <span>For you</span>
+            <h3>Your bet dashboard</h3>
+          </div>
           <LinkBox url={result.organizerUrl} />
-          <h3>Invitation {result.invitationUrls.length === 1 ? "link" : "links"}</h3>
+          <div className="section-title">
+            <span>For friends</span>
+            <h3>Invite {result.invitationUrls.length === 1 ? "link" : "links"}</h3>
+          </div>
           {result.invitationUrls.map((url) => (
             <LinkBox key={url} url={url} />
           ))}
         </div>
-        <p className="hero-note">
-          Send each invitation to one participant. Anyone with a link can use it once, so treat
-          these as bearer credentials.
+        <p className="helper-panel">
+          Send one link to each friend. Every link works once, so don’t post them publicly.
         </p>
         <div className="row">
           <Link className="button" href={result.organizerUrl}>
-            Open organizer page
+            Open my dashboard
           </Link>
           <Link className="button button-secondary" href="/">
             Return home
@@ -108,140 +113,181 @@ export function CreateBetForm() {
   if (previewing) {
     const pot = draft.participantCount * draft.stakeUsd;
     return (
-      <div className="card preview">
-        <div className="notice">
-          This is the final preview. Your creator submission is immutable after you create the Bet.
+      <div className="review-layout">
+        <div className="review-panel preview">
+          <div className="notice">
+            Last look: once you create the bet, your answer can’t be changed.
+          </div>
+          <dl>
+            <dt>Title</dt>
+            <dd>{draft.title}</dd>
+            <dt>Question</dt>
+            <dd>{draft.question}</dd>
+            <dt>Ground rules</dt>
+            <dd>{draft.decisionContext}</dd>
+            <dt>People</dt>
+            <dd>{draft.participantCount}</dd>
+            <dt>Pretend stake</dt>
+            <dd>
+              ${draft.stakeUsd.toLocaleString()} each · ${pot.toLocaleString()} pretend pot
+              <br />
+              No money was collected or paid.
+            </dd>
+            <dt>Name</dt>
+            <dd>{draft.creator.name}</dd>
+            <dt>Your answer</dt>
+            <dd>{draft.creator.position}</dd>
+            <dt>Your case</dt>
+            <dd>{draft.creator.submission}</dd>
+            <dt>Sources</dt>
+            <dd>{parseSourceUrls(draft.creator.sourceUrlsText).join("\n") || "None"}</dd>
+          </dl>
+          {error ? <div className="notice error">{error}</div> : null}
+          <div className="row">
+            <button className="button" type="button" onClick={createBet} disabled={submitting}>
+              {submitting ? "Creating…" : "Create bet"}
+            </button>
+            <button
+              className="button button-secondary"
+              type="button"
+              onClick={() => setPreviewing(false)}
+              disabled={submitting}
+            >
+              Edit
+            </button>
+          </div>
         </div>
-        <dl>
-          <dt>Title</dt>
-          <dd>{draft.title}</dd>
-          <dt>Question</dt>
-          <dd>{draft.question}</dd>
-          <dt>Decision Frame</dt>
-          <dd>{draft.decisionContext}</dd>
-          <dt>Participants</dt>
-          <dd>{draft.participantCount}</dd>
-          <dt>Nominal stake</dt>
-          <dd>
-            ${draft.stakeUsd.toLocaleString()} each · ${pot.toLocaleString()} hypothetical pot
-            <br />
-            No money was collected or paid.
-          </dd>
-          <dt>Name</dt>
-          <dd>{draft.creator.name}</dd>
-          <dt>Position</dt>
-          <dd>{draft.creator.position}</dd>
-          <dt>Submission</dt>
-          <dd>{draft.creator.submission}</dd>
-          <dt>Sources</dt>
-          <dd>{parseSourceUrls(draft.creator.sourceUrlsText).join("\n") || "None"}</dd>
-        </dl>
-        {error ? <div className="notice error">{error}</div> : null}
-        <div className="row">
-          <button className="button" type="button" onClick={createBet} disabled={submitting}>
-            {submitting ? "Creating…" : "Confirm and create"}
-          </button>
-          <button
-            className="button button-secondary"
-            type="button"
-            onClick={() => setPreviewing(false)}
-            disabled={submitting}
-          >
-            Edit
-          </button>
-        </div>
+        <aside className="form-ticket">
+          <span className="ticket-label">Ready to go</span>
+          <strong>{draft.participantCount} people</strong>
+          <strong>${pot.toLocaleString()} pretend pot</strong>
+          <p>No money will be collected or paid.</p>
+        </aside>
       </div>
     );
   }
 
   return (
-    <form className="card form-grid" onSubmit={submit}>
-      <div className="field field-full">
-        <label htmlFor="title">Title</label>
-        <input
-          id="title"
-          className="input"
-          required
-          maxLength={120}
-          value={draft.title}
-          onChange={(e) => update("title", e.target.value)}
-        />
+    <form className="create-layout" onSubmit={submit}>
+      <div className="form-main">
+        <section className="form-section">
+          <div className="form-section-heading">
+            <span>1</span>
+            <div>
+              <h2>Bet details</h2>
+              <p>What are you trying to settle?</p>
+            </div>
+          </div>
+          <div className="form-grid">
+            <div className="field field-full">
+              <label htmlFor="title">Title</label>
+              <input
+                id="title"
+                className="input"
+                required
+                maxLength={120}
+                value={draft.title}
+                onChange={(e) => update("title", e.target.value)}
+              />
+            </div>
+            <div className="field field-full">
+              <label htmlFor="question">The question</label>
+              <textarea
+                id="question"
+                className="input"
+                required
+                maxLength={500}
+                value={draft.question}
+                onChange={(e) => update("question", e.target.value)}
+              />
+            </div>
+            <div className="field field-full">
+              <label htmlFor="context">Ground rules</label>
+              <textarea
+                id="context"
+                className="input"
+                required
+                style={{ minHeight: 180 }}
+                value={draft.decisionContext}
+                onChange={(e) => update("decisionContext", e.target.value)}
+              />
+              <small>
+                Add any context, judging criteria, assumptions, or things that should be ignored.
+              </small>
+            </div>
+            <div className="field">
+              <label htmlFor="participants">How many people?</label>
+              <select
+                id="participants"
+                className="input"
+                value={draft.participantCount}
+                onChange={(e) => update("participantCount", Number(e.target.value))}
+              >
+                {[2, 3, 4].map((count) => (
+                  <option key={count} value={count}>
+                    {count} people
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="stake">Pretend stake per person</label>
+              <input
+                id="stake"
+                className="input"
+                type="number"
+                required
+                min={1}
+                max={10000}
+                step={1}
+                value={draft.stakeUsd}
+                onChange={(e) => update("stakeUsd", Number(e.target.value))}
+              />
+              <small>
+                ${(draft.stakeUsd * draft.participantCount).toLocaleString()} pretend pot. No money
+                moves.
+              </small>
+            </div>
+          </div>
+        </section>
+        <section className="form-section">
+          <div className="form-section-heading">
+            <span>2</span>
+            <div>
+              <h2>Your take</h2>
+              <p>You go first. Friends won’t see this until the result is posted.</p>
+            </div>
+          </div>
+          <div className="form-grid">
+            <SubmissionFields
+              value={draft.creator}
+              onChange={(creator) => update("creator", creator)}
+              nameLabel="Your name"
+            />
+          </div>
+        </section>
       </div>
-      <div className="field field-full">
-        <label htmlFor="question">Exact question or premise</label>
-        <textarea
-          id="question"
-          className="input"
-          required
-          maxLength={500}
-          value={draft.question}
-          onChange={(e) => update("question", e.target.value)}
-        />
-      </div>
-      <div className="field field-full">
-        <label htmlFor="context">Context, criteria, assumptions, and exclusions</label>
-        <textarea
-          id="context"
-          className="input"
-          required
-          style={{ minHeight: 180 }}
-          value={draft.decisionContext}
-          onChange={(e) => update("decisionContext", e.target.value)}
-        />
-        <small>
-          Up to 2,000 words. Define what evidence should count and what is out of scope.
-        </small>
-      </div>
-      <div className="field">
-        <label htmlFor="participants">Total participants</label>
-        <select
-          id="participants"
-          className="input"
-          value={draft.participantCount}
-          onChange={(e) => update("participantCount", Number(e.target.value))}
-        >
-          {[2, 3, 4].map((count) => (
-            <option key={count} value={count}>
-              {count} people
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="field">
-        <label htmlFor="stake">Per-person nominal stake (USD)</label>
-        <input
-          id="stake"
-          className="input"
-          type="number"
-          required
-          min={1}
-          max={10000}
-          step={1}
-          value={draft.stakeUsd}
-          onChange={(e) => update("stakeUsd", Number(e.target.value))}
-        />
-        <small>
-          ${(draft.stakeUsd * draft.participantCount).toLocaleString()} hypothetical pot. No money
-          is processed.
-        </small>
-      </div>
-      <div className="field-full">
-        <hr />
-      </div>
-      <div className="field-full stack" style={{ gap: 7 }}>
-        <p className="eyebrow">Participant A</p>
-        <h3>Your sealed submission</h3>
-      </div>
-      <SubmissionFields
-        value={draft.creator}
-        onChange={(creator) => update("creator", creator)}
-        nameLabel="Creator name"
-      />
-      <div className="field-full">
+      <aside className="form-ticket">
+        <span className="ticket-label">Bet summary</span>
+        <dl>
+          <div>
+            <dt>People</dt>
+            <dd>{draft.participantCount}</dd>
+          </div>
+          <div>
+            <dt>Stake each</dt>
+            <dd>${draft.stakeUsd.toLocaleString()}</dd>
+          </div>
+          <div>
+            <dt>Pretend pot</dt>
+            <dd>${(draft.stakeUsd * draft.participantCount).toLocaleString()}</dd>
+          </div>
+        </dl>
+        <p>No money will be collected or paid.</p>
         <button className="button" type="submit">
-          Review Bet
+          Review bet
         </button>
-      </div>
+      </aside>
     </form>
   );
 }

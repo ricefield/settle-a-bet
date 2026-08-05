@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { PanelMember, PositionGroup, VoteType } from "@/lib/types";
 
 export const PARTICIPANT_LABELS = ["A", "B", "C", "D"] as const;
-export const PROMPT_VERSION = "mvp-1";
+export const PROMPT_VERSION = "mvp-2-friendly-language";
 export const AGGREGATION_POLICY_VERSION = "mvp-1";
 
 export type PositionMapProposal = { groups: string[][] };

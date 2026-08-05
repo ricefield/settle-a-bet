@@ -44,7 +44,7 @@ export function ParticipantForm({ token, label }: { token: string; label: string
         submittedCount?: number;
         participantCount?: number;
       };
-      if (!response.ok) throw new Error(body.error?.message ?? "Submission failed");
+      if (!response.ok) throw new Error(body.error?.message ?? "We couldn’t save your take");
       setResult(body as Required<Omit<typeof body, "error">>);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unexpected error");
@@ -56,18 +56,18 @@ export function ParticipantForm({ token, label }: { token: string; label: string
   if (result) {
     const allSubmitted = result.submittedCount === result.participantCount;
     return (
-      <div className="card stack">
+      <div className="success-panel">
         <div className="notice success">
-          <strong>Submission sealed.</strong> It cannot be edited or submitted again.
+          <strong>Your take is locked in.</strong> It can’t be edited or sent again.
         </div>
         <p>
           {allSubmitted
-            ? "All participants have submitted. Evaluation has been queued."
-            : `${result.submittedCount} of ${result.participantCount} participants have submitted.`}
+            ? "Everyone is in. The AI panel is getting to work."
+            : `${result.submittedCount} of ${result.participantCount} people are in.`}
         </p>
         {result.status === "PUBLISHED" ? (
           <Link href={`/bets/${result.publicId}`} className="button">
-            Read the Judgment
+            See the result
           </Link>
         ) : (
           <Link href="/" className="button button-secondary">
@@ -80,19 +80,19 @@ export function ParticipantForm({ token, label }: { token: string; label: string
 
   if (previewing) {
     return (
-      <div className="card preview">
+      <div className="review-panel preview">
         <div className="notice">
-          This is your final preview. Confirming makes this submission immutable and eventually
-          public under your name.
+          Last look: once you lock this in, it can’t be changed and will be public with your name
+          when the result is ready.
         </div>
         <dl>
-          <dt>Participant</dt>
+          <dt>Spot</dt>
           <dd>{label}</dd>
           <dt>Name</dt>
           <dd>{draft.name}</dd>
-          <dt>Position</dt>
+          <dt>Your answer</dt>
           <dd>{draft.position}</dd>
-          <dt>Submission</dt>
+          <dt>Your case</dt>
           <dd>{draft.submission}</dd>
           <dt>Sources</dt>
           <dd>{parseSourceUrls(draft.sourceUrlsText).join("\n") || "None"}</dd>
@@ -100,7 +100,7 @@ export function ParticipantForm({ token, label }: { token: string; label: string
         {error ? <div className="notice error">{error}</div> : null}
         <div className="row">
           <button className="button" onClick={confirm} disabled={submitting}>
-            {submitting ? "Sealing…" : "Confirm and seal"}
+            {submitting ? "Locking it in…" : "Lock it in"}
           </button>
           <button
             className="button button-secondary"
@@ -115,11 +115,18 @@ export function ParticipantForm({ token, label }: { token: string; label: string
   }
 
   return (
-    <form className="card form-grid" onSubmit={preview}>
+    <form className="participant-form form-grid" onSubmit={preview}>
+      <div className="field-full form-section-heading compact-heading">
+        <span>{label}</span>
+        <div>
+          <h2>Add your take</h2>
+          <p>Your answer stays private until the final result is posted.</p>
+        </div>
+      </div>
       <SubmissionFields value={draft} onChange={setDraft} />
       <div className="field-full">
         <button className="button" type="submit">
-          Review submission
+          Review my take
         </button>
       </div>
     </form>

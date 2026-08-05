@@ -14,21 +14,22 @@ export function OrganizerActions({ token, canCancel }: { token: string; canCance
         className="button button-danger"
         disabled={working}
         onClick={async () => {
-          if (!window.confirm("Cancel this Bet? No further submissions will be accepted.")) return;
+          if (!window.confirm("Cancel this bet? No one else will be able to add an answer."))
+            return;
           setWorking(true);
           const response = await fetch(`/api/organizer/${encodeURIComponent(token)}/cancel`, {
             method: "POST",
           });
           const body = (await response.json()) as { error?: { message?: string } };
           if (!response.ok) {
-            setError(body.error?.message ?? "Cancellation failed");
+            setError(body.error?.message ?? "We couldn’t cancel this bet");
             setWorking(false);
             return;
           }
           router.refresh();
         }}
       >
-        {working ? "Cancelling…" : "Cancel Bet"}
+        {working ? "Cancelling…" : "Cancel bet"}
       </button>
       {error ? <div className="notice error">{error}</div> : null}
     </div>

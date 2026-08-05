@@ -9,7 +9,7 @@ import { CopyLink, OrganizerActions } from "./OrganizerActions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Organize a Bet",
+  title: "Bet dashboard",
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };
@@ -34,55 +34,73 @@ export default async function OrganizerPage({ params }: { params: Promise<{ toke
   }
   const submitted = organizer.slots.filter((slot) => slot.submitted).length;
   return (
-    <main className="narrow form-page">
-      <header className="form-header stack">
-        <p className="eyebrow">Private organizer view</p>
-        <h1 style={{ fontSize: "clamp(2.8rem, 7vw, 5rem)" }}>{organizer.title}</h1>
-        <p className="lede">{organizer.question}</p>
-        <div className="row">
-          <span className="pill">{organizer.status.replaceAll("_", " ")}</span>
-          <span>
-            {submitted} of {organizer.participantCount} submitted
-          </span>
-        </div>
+    <main className="shell form-page organizer-page">
+      <header className="form-header">
+        <span className="status-chip status-chip-live">
+          <span /> Private dashboard
+        </span>
+        <h1>{organizer.title}</h1>
+        <p>{organizer.question}</p>
       </header>
-      <section className="card stack">
-        <h3>Participants</h3>
-        <ul className="status-list">
-          {organizer.slots.map((slot) => (
-            <li className="status-item" key={slot.label}>
-              <span>
-                {slot.label}
-                {slot.name ? ` · ${slot.name}` : ""}
-              </span>
-              <strong>{slot.submitted ? "Sealed" : "Waiting"}</strong>
-            </li>
-          ))}
-        </ul>
-        {organizer.invitationUrls.length ? (
-          <div className="stack">
-            <h3>Invitation links</h3>
-            {organizer.invitationUrls.map((url) => (
-              <CopyLink key={url} url={url} />
+      <section className="dashboard-layout">
+        <div className="dashboard-main">
+          <div className="dashboard-heading">
+            <div>
+              <span className="ticket-label">Progress</span>
+              <h2>
+                {submitted} of {organizer.participantCount} people are in
+              </h2>
+            </div>
+            <span className="status-chip">{organizer.status.replaceAll("_", " ")}</span>
+          </div>
+          <div className="progress-track">
+            <span style={{ width: `${(submitted / organizer.participantCount) * 100}%` }} />
+          </div>
+          <ul className="status-list">
+            {organizer.slots.map((slot) => (
+              <li className="status-item" key={slot.label}>
+                <span className="participant-mark">{slot.label}</span>
+                <div>
+                  <strong>{slot.name || `Friend ${slot.label}`}</strong>
+                  <small>{slot.submitted ? "Answer locked in" : "Waiting for their answer"}</small>
+                </div>
+                <span className={`status-chip ${slot.submitted ? "status-chip-done" : ""}`}>
+                  {slot.submitted ? "Ready" : "Waiting"}
+                </span>
+              </li>
             ))}
-          </div>
-        ) : null}
-        <div className="notice">
-          ${organizer.stakeUsd.toLocaleString()} per person · $
-          {(organizer.stakeUsd * organizer.participantCount).toLocaleString()} hypothetical pot. No
-          money was collected or paid.
+          </ul>
+          {organizer.invitationUrls.length ? (
+            <div className="invite-links">
+              <div className="section-title">
+                <span>Share privately</span>
+                <h3>Invite links</h3>
+              </div>
+              {organizer.invitationUrls.map((url) => (
+                <CopyLink key={url} url={url} />
+              ))}
+            </div>
+          ) : null}
+          {organizer.failureReason ? (
+            <div className="notice error">
+              <strong>The panel hit a snag.</strong> {organizer.failureReason}
+            </div>
+          ) : null}
+          {organizer.status === "PUBLISHED" ? (
+            <Link className="button" href={`/bets/${organizer.publicId}`}>
+              See the result
+            </Link>
+          ) : null}
+          <OrganizerActions token={token} canCancel={organizer.status === "OPEN"} />
         </div>
-        {organizer.failureReason ? (
-          <div className="notice error">
-            <strong>Evaluation failed.</strong> {organizer.failureReason}
-          </div>
-        ) : null}
-        {organizer.status === "PUBLISHED" ? (
-          <Link className="button" href={`/bets/${organizer.publicId}`}>
-            Read the Judgment
-          </Link>
-        ) : null}
-        <OrganizerActions token={token} canCancel={organizer.status === "OPEN"} />
+        <aside className="form-ticket dashboard-ticket">
+          <span className="ticket-label">Pretend stakes</span>
+          <strong>${organizer.stakeUsd.toLocaleString()} each</strong>
+          <strong>
+            ${(organizer.stakeUsd * organizer.participantCount).toLocaleString()} total
+          </strong>
+          <p>No money was collected or paid.</p>
+        </aside>
       </section>
     </main>
   );

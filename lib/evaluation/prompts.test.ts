@@ -48,5 +48,7 @@ describe("evaluation prompts", () => {
     expect(first.user).toBe(second.user);
     expect(first.user).toContain(hash);
     expect(first.system).toContain("no web tools");
+    expect(first.system).toContain("clear, friendly language");
+    expect(first.system).toContain("Avoid courtroom and academic phrases");
   });
 });

@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CreateBetForm } from "./CreateBetForm";
 
 export const metadata: Metadata = { title: "Start a Bet" };
 
 export default function NewBetPage() {
   return (
-    <main className="narrow form-page">
-      <header className="form-header stack">
-        <p className="eyebrow">New Bet</p>
-        <h1 style={{ fontSize: "clamp(2.8rem, 7vw, 5rem)" }}>Frame the disagreement.</h1>
-        <p className="lede">
-          You submit first. Each invited participant gets one sealed, immutable submission. The
-          panel starts automatically after the last person commits.
+    <main className="shell form-page">
+      <header className="form-header">
+        <Link className="back-link" href="/">
+          ← Back to results
+        </Link>
+        <span className="status-chip status-chip-live">
+          <span /> New bet
+        </span>
+        <h1>Set up the debate.</h1>
+        <p>
+          Add the question, choose the pretend stakes, and make your case. We’ll give you one
+          private link for each friend.
         </p>
       </header>
       <CreateBetForm />
