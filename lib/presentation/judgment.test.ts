@@ -12,9 +12,9 @@ const positionMap = [
 describe("Judgment presentation", () => {
   it("turns an internal Position ID into a public-facing winner", () => {
     expect(verdictPresentation("POSITION:position-a", positionMap, participants)).toEqual({
-      eyebrow: "Ada's Position prevails",
+      eyebrow: "Ada wins",
       headline: "Venus is hotter.",
-      detail: "The panel sided with Ada.",
+      detail: "The panel picked Ada's answer.",
       winningLabels: ["A"],
     });
     expect(verdictVoteLabel("POSITION:position-b", positionMap, participants)).toBe("Grace");
@@ -22,10 +22,10 @@ describe("Judgment presentation", () => {
 
   it("explains non-Position outcomes without leaking enum labels", () => {
     expect(verdictPresentation("INDETERMINATE", positionMap, participants).headline).toBe(
-      "The panel could not settle it.",
+      "The panel couldn’t settle this one.",
     );
     expect(verdictVoteLabel("NO_MATERIAL_DISAGREEMENT", positionMap, participants)).toBe(
-      "No material disagreement",
+      "Basically a tie",
     );
   });
 

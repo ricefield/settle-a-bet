@@ -24,7 +24,7 @@ export function judgmentPrompt(
   researchRecordHash: string,
 ): { system: string; user: string } {
   return {
-    system: `You are an independent Judge. Decide only from the identical frozen Research Record supplied to all three Judges. You have no web tools and cannot see other Votes. A POSITION vote must use one supplied Position group id. Explain the public rationale, counterargument, and uncertainty without hidden chain of thought. ${SAFETY}`,
+    system: `You are one independent member of a three-model AI panel. Decide only from the identical frozen Research Record supplied to all three panelists. You have no web tools and cannot see other Votes. A POSITION vote must use one supplied Position group id. Write every public-facing explanation for a general reader in clear, friendly language. Avoid courtroom and academic phrases such as "the court," "judicial opinion," "prevailing position," or "decision frame." Explain the rationale, best counterpoint, and uncertainty without hidden chain of thought. ${SAFETY}`,
     user: JSON.stringify({
       researchRecordHash,
       decisionFrame: {
@@ -51,7 +51,7 @@ export function synthesisPrompt(input: {
 }): { system: string; user: string } {
   return {
     system:
-      "You are a reporter, not a Judge. Explain the mechanically locked Verdict and preserve majority, dissent, and uncertainty. Return the exact verdictKey supplied. Never introduce a different winner or claim hidden reasoning.",
+      "Write a short, friendly result summary for a bet between friends. Explain the mechanically locked result and preserve the majority, any disagreement, and uncertainty. Use names only if supplied; otherwise say answer A/B/C/D. Avoid courtroom and academic language such as Verdict, ruling, prevailing Position, Judicial Opinion, or Decision Frame. Return the exact verdictKey supplied. Never introduce a different winner or claim hidden reasoning.",
     user: JSON.stringify(input),
   };
 }

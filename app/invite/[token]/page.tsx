@@ -7,7 +7,7 @@ import { ParticipantForm } from "./ParticipantForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Submit to a Bet",
+  title: "Add your take",
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };
@@ -24,25 +24,32 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
   const pot = invitation.stakeUsd * invitation.participantCount;
   const unavailable = invitation.status !== "OPEN" || invitation.alreadySubmitted;
   return (
-    <main className="narrow form-page">
-      <header className="form-header stack">
-        <p className="eyebrow">Private invitation · {invitation.label}</p>
-        <h1 style={{ fontSize: "clamp(2.7rem, 7vw, 5rem)" }}>{invitation.title}</h1>
-        <p className="lede">{invitation.question}</p>
+    <main className="shell form-page invite-page">
+      <header className="form-header">
+        <span className="status-chip status-chip-live">
+          <span /> You’re up · Spot {invitation.label}
+        </span>
+        <h1>{invitation.title}</h1>
+        <p>{invitation.question}</p>
       </header>
-      <section className="card stack" style={{ marginBottom: 18 }}>
-        <h3>Decision Frame</h3>
-        <p className="prose">{invitation.decisionContext}</p>
-        <div className="notice">
-          ${invitation.stakeUsd.toLocaleString()} per person · ${pot.toLocaleString()} hypothetical
-          pot. No money was collected or paid.
+      <section className="invite-overview">
+        <div>
+          <span className="ticket-label">What to keep in mind</span>
+          <h2>Ground rules</h2>
+          <p>{invitation.decisionContext}</p>
         </div>
+        <aside className="form-ticket">
+          <span className="ticket-label">Pretend stakes</span>
+          <strong>${invitation.stakeUsd.toLocaleString()} each</strong>
+          <strong>${pot.toLocaleString()} total</strong>
+          <p>No money will be collected or paid.</p>
+        </aside>
       </section>
       {unavailable ? (
         <div className="notice">
           {invitation.alreadySubmitted
-            ? "This invitation has already been used."
-            : `This Bet is ${invitation.status.toLowerCase().replaceAll("_", " ")} and no longer accepts submissions.`}
+            ? "This link has already been used."
+            : `This bet is ${invitation.status.toLowerCase().replaceAll("_", " ")} and is no longer taking answers.`}
         </div>
       ) : (
         <ParticipantForm token={token} label={invitation.label} />

@@ -8,19 +8,19 @@ export type PublicParticipant = {
 
 const OUTCOME_COPY: Record<string, { eyebrow: string; headline: string; detail: string }> = {
   NO_MATERIAL_DISAGREEMENT: {
-    eyebrow: "No material disagreement",
-    headline: "You were closer than you thought.",
-    detail: "The panel found the submitted Positions substantively compatible.",
+    eyebrow: "Basically a tie",
+    headline: "You’re saying the same thing.",
+    detail: "At least two panelists found that the answers agree where it matters.",
   },
   NO_SUBMITTED_POSITION_PREVAILS: {
-    eyebrow: "No Position prevailed",
-    headline: "The panel rejected every submitted answer.",
-    detail: "At least two Judges found every submitted Position materially flawed.",
+    eyebrow: "Neither answer won",
+    headline: "The panel wasn’t sold on either take.",
+    detail: "At least two panelists found that every submitted answer had a major problem.",
   },
   INDETERMINATE: {
-    eyebrow: "Indeterminate",
-    headline: "The panel could not settle it.",
-    detail: "No two Judges aligned on a prevailing outcome.",
+    eyebrow: "Too close to call",
+    headline: "The panel couldn’t settle this one.",
+    detail: "No two panelists landed on the same result.",
   },
 };
 
@@ -33,7 +33,7 @@ export function panelMemberName(member: string | undefined): string {
     case "XAI_GROK":
       return "Grok";
     default:
-      return member?.replaceAll("_", " ") ?? "Unknown Judge";
+      return member?.replaceAll("_", " ") ?? "Unknown panelist";
   }
 }
 
@@ -54,8 +54,8 @@ export function verdictVoteLabel(
     .map((label) => participants.find((participant) => participant.label === label)?.name)
     .filter((name): name is string => Boolean(name));
 
-  if (!names.length) return "A submitted Position";
-  if (names.length === 1) return names[0] ?? "A submitted Position";
+  if (!names.length) return "One answer";
+  if (names.length === 1) return names[0] ?? "One answer";
   return names.join(" + ");
 }
 
@@ -66,9 +66,9 @@ export function verdictPresentation(
 ): { eyebrow: string; headline: string; detail: string; winningLabels: string[] } {
   if (!verdictKey.startsWith("POSITION:")) {
     const copy = OUTCOME_COPY[verdictKey] ?? {
-      eyebrow: "Panel result",
+      eyebrow: "Final result",
       headline: verdictKey.toLowerCase().replaceAll("_", " "),
-      detail: "The Judge Panel has published its decision.",
+      detail: "The AI panel has posted its result.",
     };
     return { ...copy, winningLabels: [] };
   }
@@ -82,9 +82,9 @@ export function verdictPresentation(
 
   if (!winners.length) {
     return {
-      eyebrow: "A Position prevailed",
-      headline: "The panel reached a majority decision.",
-      detail: "See the Judge votes below for the winning Position.",
+      eyebrow: "We have a winner",
+      headline: "The panel picked one answer.",
+      detail: "See the panel votes below for the winning take.",
       winningLabels: members,
     };
   }
@@ -92,13 +92,12 @@ export function verdictPresentation(
   const names = winners.map((winner) => winner.name);
   const positions = [...new Set(winners.map((winner) => winner.position.trim()))];
   return {
-    eyebrow:
-      names.length === 1 ? `${names[0]}'s Position prevails` : `${names.join(" + ")} prevail`,
-    headline: positions[0] ?? "A submitted Position prevailed.",
+    eyebrow: names.length === 1 ? `${names[0]} wins` : `${names.join(" + ")} win`,
+    headline: positions[0] ?? "One answer won.",
     detail:
       names.length > 1 && positions.length > 1
-        ? "The panel treated these Positions as materially equivalent."
-        : `The panel sided with ${names.join(" and ")}.`,
+        ? "The panel treated these answers as meaningfully the same."
+        : `The panel picked ${names.join(" and ")}'s answer.`,
     winningLabels: members,
   };
 }

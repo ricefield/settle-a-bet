@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getBetModule } from "@/lib/bet";
@@ -17,12 +18,6 @@ type Contribution = {
   contribution?: {
     unresolvedQuestions?: string[];
     searchQueries?: string[];
-    sources?: Array<{
-      url?: string;
-      title?: string;
-      retrievedAt?: string;
-      relevantExcerpt?: string;
-    }>;
     positions?: Array<{
       participantLabel?: string;
       strongestCase?: string;
@@ -31,6 +26,7 @@ type Contribution = {
     }>;
   };
 };
+
 type Vote = {
   panelMember?: string;
   voteKey?: string;
@@ -43,6 +39,7 @@ type Vote = {
     citedUrls?: string[];
   };
 };
+
 type PublicData = {
   researchRecord?: {
     contributions?: Contribution[];
@@ -78,16 +75,16 @@ export async function generateMetadata({
     const bet = await getBetModule().getPublic(publicId);
     const hidden = bet.visibility === "HIDDEN";
     return {
-      title: hidden ? "Judgment unavailable" : bet.title,
-      description: hidden ? "This Judgment has been taken down." : bet.question,
+      title: hidden ? "Result unavailable" : bet.title,
+      description: hidden ? "This result has been taken down." : bet.question,
       robots: hidden ? { index: false, follow: false } : { index: true, follow: true },
     };
   } catch {
-    return { title: "Judgment not found", robots: { index: false, follow: false } };
+    return { title: "Result not found", robots: { index: false, follow: false } };
   }
 }
 
-export default async function JudgmentPage({ params }: { params: Promise<{ publicId: string }> }) {
+export default async function ResultPage({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
   let bet;
   try {
@@ -96,17 +93,17 @@ export default async function JudgmentPage({ params }: { params: Promise<{ publi
     if (error instanceof AppError && error.statusCode === 404) notFound();
     throw error;
   }
-  if (bet.visibility === "HIDDEN")
+
+  if (bet.visibility === "HIDDEN") {
     return (
       <main className="narrow form-page">
         <div className="notice error">
-          <h2>Judgment unavailable</h2>
-          <p>
-            This published Judgment was taken down after a report. Its Verdict was not rewritten.
-          </p>
+          <h2>This result is unavailable</h2>
+          <p>It was taken down after a report. The panel’s original result was not changed.</p>
         </div>
       </main>
     );
+  }
   if (!bet.judgment) notFound();
 
   const data = asPublicData(bet.judgment.publicData);
@@ -119,14 +116,14 @@ export default async function JudgmentPage({ params }: { params: Promise<{ publi
     name: slot.name,
     position: slot.position,
   }));
-  const verdict = verdictPresentation(bet.judgment.verdictKey, positionMap, participants);
-  const panelSplit = voteSplit(
+  const result = verdictPresentation(bet.judgment.verdictKey, positionMap, participants);
+  const split = voteSplit(
     bet.judgment.verdictKey,
     votes.map((vote) => vote.voteKey),
   );
-  const prevailingVotes = votes.filter((vote) => vote.voteKey === bet.judgment?.verdictKey);
-  const decisiveReasons = uniqueItems(
-    (prevailingVotes.length ? prevailingVotes : votes).flatMap(
+  const winningVotes = votes.filter((vote) => vote.voteKey === bet.judgment?.verdictKey);
+  const keyReasons = uniqueItems(
+    (winningVotes.length ? winningVotes : votes).flatMap(
       (vote) => vote.opinion?.decisiveConsiderations ?? [],
     ),
     4,
@@ -135,294 +132,336 @@ export default async function JudgmentPage({ params }: { params: Promise<{ publi
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@example.com";
 
   return (
-    <main className="judgment-page">
-      <header className="judgment-hero">
-        <div className="shell judgment-hero-grid">
-          <div className="judgment-reveal stack">
-            <p className="result-kicker">The panel has ruled</p>
-            <p className="result-eyebrow">{verdict.eyebrow}</p>
-            <h1>{verdict.headline}</h1>
-            <p className="result-detail">{verdict.detail}</p>
-            <p className="judgment-synthesis">{bet.judgment.synthesis}</p>
+    <main className="result-page">
+      <div className="shell result-breadcrumb">
+        <Link href="/">Results</Link>
+        <span>›</span>
+        <span>Settled bet</span>
+      </div>
+
+      <header className="shell result-layout">
+        <div className="result-main">
+          <div className="result-title-row">
+            <div className="result-icon" aria-hidden="true">
+              ✓
+            </div>
+            <div>
+              <span className="status-chip status-chip-done">Settled</span>
+              <h1>{bet.title}</h1>
+            </div>
           </div>
-
-          <aside className="verdict-board" aria-label="Judge Panel result">
-            <p className="verdict-board-label">Final vote</p>
-            <strong className="verdict-score">{panelSplit}</strong>
-            <ol className="judge-tally">
-              {votes.map((vote, index) => (
-                <li key={`${vote.panelMember}-${index}`}>
-                  <span>{panelMemberName(vote.panelMember)}</span>
-                  <strong>{verdictVoteLabel(vote.voteKey, positionMap, participants)}</strong>
-                </li>
-              ))}
-            </ol>
-          </aside>
-        </div>
-
-        <div className="shell case-heading">
-          <p className="case-label">The Bet</p>
-          <h2>{bet.title}</h2>
-          <p className="case-question">{bet.question}</p>
-          <div className="case-meta">
+          <p className="result-question">{bet.question}</p>
+          <div className="result-meta">
             <span>{bet.slots.map((slot) => slot.name).join(" vs. ")}</span>
             {bet.publishedAt ? (
               <time dateTime={bet.publishedAt.toISOString()}>
-                Decided {bet.publishedAt.toLocaleDateString()}
+                Settled {bet.publishedAt.toLocaleDateString()}
               </time>
             ) : null}
             <span>${bet.stakeUsd.toLocaleString()} each</span>
-            <span>${pot.toLocaleString()} hypothetical pot</span>
           </div>
-          <p className="money-disclaimer">No money was collected or paid.</p>
+
+          <section className="result-callout" aria-labelledby="final-result-heading">
+            <div className="result-callout-label">
+              <span>Final result</span>
+              <strong>{split}</strong>
+            </div>
+            <h2 id="final-result-heading">{result.headline}</h2>
+            <p className="winner-name">{result.eyebrow}</p>
+            <p className="result-summary">{result.detail}</p>
+            <details className="result-summary-more simple-disclosure">
+              <summary>
+                <span>Read the full result summary</span>
+                <span aria-hidden="true">+</span>
+              </summary>
+              <p>{bet.judgment.synthesis}</p>
+            </details>
+          </section>
         </div>
+
+        <aside className="panel-card" aria-label="AI panel votes">
+          <div className="panel-card-heading">
+            <div>
+              <span>AI panel</span>
+              <h2>{split.split(" · ")[1] ?? split}</h2>
+            </div>
+            <span className="status-chip status-chip-done">Final</span>
+          </div>
+          <ul className="vote-list">
+            {votes.map((vote, index) => (
+              <li key={`${vote.panelMember}-${index}`}>
+                <span className="model-avatar">{panelMemberName(vote.panelMember).charAt(0)}</span>
+                <div>
+                  <strong>{panelMemberName(vote.panelMember)}</strong>
+                  <small>Picked</small>
+                </div>
+                <b>{verdictVoteLabel(vote.voteKey, positionMap, participants)}</b>
+              </li>
+            ))}
+          </ul>
+          <div className="pot-summary">
+            <div>
+              <span>Pretend pot</span>
+              <strong>${pot.toLocaleString()}</strong>
+            </div>
+            <p>No money was collected or paid.</p>
+          </div>
+        </aside>
       </header>
 
-      <nav className="judgment-nav" aria-label="Judgment sections">
+      <nav className="result-tabs" aria-label="Result sections">
         <div className="shell">
-          <a href="#ruling">The ruling</a>
-          <a href="#positions">The Positions</a>
-          <a href="#panel">The panel</a>
-          <a href="#evidence">Evidence</a>
-          <a href="#transparency">Transparency</a>
+          <a href="#breakdown">Why it won</a>
+          <a href="#takes">Everyone’s take</a>
+          <a href="#panel">Panel votes</a>
+          <a href="#sources">Sources</a>
+          <a href="#details">Behind the scenes</a>
         </div>
       </nav>
 
-      <section className="shell judgment-section ruling-grid" id="ruling">
+      <section className="shell result-section breakdown-layout" id="breakdown">
         <div>
-          <p className="section-number">01 / The ruling</p>
-          <h2>{decisiveReasons.length ? "What decided it" : "The panel's conclusion"}</h2>
-          {decisiveReasons.length ? (
-            <ol className="decisive-list">
-              {decisiveReasons.map((reason) => (
-                <li key={reason}>{reason}</li>
+          <div className="section-heading-copy">
+            <h2>Why this won</h2>
+            <p>The points that mattered most to the majority.</p>
+          </div>
+          {keyReasons.length ? (
+            <ol className="reason-list">
+              {keyReasons.map((reason, index) => (
+                <li key={reason}>
+                  <span>{index + 1}</span>
+                  <p>{reason}</p>
+                </li>
               ))}
             </ol>
           ) : (
             <p className="prose">{bet.judgment.synthesis}</p>
           )}
         </div>
-        <aside className="decision-frame">
-          <p className="decision-frame-label">The rules of the argument</p>
-          <h3>Decision Frame</h3>
+        <aside className="rules-card">
+          <span>Ground rules</span>
+          <h3>What the panel was asked to consider</h3>
           <p>{bet.decisionContext}</p>
         </aside>
       </section>
 
-      <section className="shell judgment-section" id="positions">
-        <div className="story-heading">
-          <p className="section-number">02 / The Positions</p>
-          <h2>The argument, in their own words</h2>
-          <p>Each Participant committed one sealed Position before the panel began its work.</p>
-        </div>
-        <div className="position-stage">
-          {bet.slots.map((slot) => {
-            const prevailed = verdict.winningLabels.includes(slot.label);
-            return (
-              <article
-                className={`position-story${prevailed ? " position-winner" : ""}`}
-                key={slot.label}
-              >
-                <div className="position-person">
-                  <span className="participant-mark">{slot.label}</span>
-                  <div>
-                    <p>{prevailed ? "Prevailing Position" : "Submitted Position"}</p>
-                    <h3>{slot.name}</h3>
-                  </div>
-                </div>
-                <blockquote>{slot.position}</blockquote>
-                <p className="submission-copy">{slot.submission}</p>
-                {slot.sourceUrls.length ? (
-                  <div className="participant-sources">
-                    <strong>Sources submitted by {slot.name}</strong>
-                    <ul>
-                      {slot.sourceUrls.map((url) => (
-                        <li key={url}>
-                          <a href={url} target="_blank" rel="noreferrer nofollow">
-                            {url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="panel-section" id="panel">
-        <div className="shell judgment-section">
-          <div className="story-heading story-heading-light">
-            <p className="section-number">03 / The panel</p>
-            <h2>Three Judges. One shared record.</h2>
-            <p>
-              They researched independently, then voted blind without browsing or seeing one
-              another's opinions.
-            </p>
+      <section className="result-section result-section-muted" id="takes">
+        <div className="shell">
+          <div className="section-heading-copy">
+            <h2>What everyone said</h2>
+            <p>Each take stayed private until the result was posted.</p>
           </div>
-          <div className="opinion-list">
-            {votes.map((vote, index) => (
-              <article className="opinion" key={`${vote.panelMember}-${index}`}>
-                <div className="opinion-header">
-                  <div>
-                    <p>Judge {String(index + 1).padStart(2, "0")}</p>
-                    <h3>{panelMemberName(vote.panelMember)}</h3>
+          <div className="take-list">
+            {bet.slots.map((slot) => {
+              const won = result.winningLabels.includes(slot.label);
+              return (
+                <article className={`take-card${won ? " take-card-winner" : ""}`} key={slot.label}>
+                  <div className="take-card-heading">
+                    <span className="participant-mark">{slot.label}</span>
+                    <div>
+                      <h3>{slot.name}</h3>
+                      <span>{won ? "Panel pick" : "Their answer"}</span>
+                    </div>
+                    {won ? <span className="status-chip status-chip-done">Winner</span> : null}
                   </div>
-                  <div className="opinion-vote">
-                    <span>Voted for</span>
-                    <strong>{verdictVoteLabel(vote.voteKey, positionMap, participants)}</strong>
-                  </div>
-                </div>
-                <p className="opinion-interpretation">{vote.opinion?.interpretation}</p>
-                {vote.opinion?.decisiveConsiderations?.length ? (
-                  <details className="opinion-disclosure">
+                  <blockquote>{slot.position}</blockquote>
+                  <details className="simple-disclosure">
                     <summary>
-                      <span>Read {panelMemberName(vote.panelMember)}'s full opinion</span>
+                      <span>Read {slot.name}’s full case</span>
                       <span aria-hidden="true">+</span>
                     </summary>
-                    <div className="opinion-columns">
-                      <div>
-                        <h4>Decisive considerations</h4>
-                        <ul>
-                          {vote.opinion.decisiveConsiderations.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4>Strongest counterargument</h4>
-                        <p>{vote.opinion.strongestCounterargument}</p>
-                        <h4>Remaining uncertainty</h4>
-                        <p>{vote.opinion.uncertainty}</p>
-                      </div>
+                    <div className="take-details">
+                      <p>{slot.submission}</p>
+                      {slot.sourceUrls.length ? (
+                        <div>
+                          <strong>Links they shared</strong>
+                          <ul>
+                            {slot.sourceUrls.map((url) => (
+                              <li key={url}>
+                                <a href={url} target="_blank" rel="noreferrer nofollow">
+                                  {url}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                     </div>
                   </details>
-                ) : null}
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="shell judgment-section" id="evidence">
-        <div className="story-heading">
-          <p className="section-number">04 / The evidence</p>
-          <h2>Follow the source trail</h2>
-          <p>
-            The three attributed Research Contributions were combined mechanically. No fourth model
-            rewrote the evidence.
-          </p>
+      <section className="shell result-section" id="panel">
+        <div className="section-heading-copy">
+          <h2>How the panel voted</h2>
+          <p>Each model used the same set of sources and voted without seeing the others.</p>
         </div>
-
-        {sources.length ? (
-          <ol className="evidence-index">
-            {sources.map((source, index) => (
-              <li key={`${source.url}-${index}`}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
+        <div className="panel-takes">
+          {votes.map((vote, index) => (
+            <article className="panel-take" key={`${vote.panelMember}-${index}`}>
+              <div className="panel-take-heading">
+                <span className="model-avatar">{panelMemberName(vote.panelMember).charAt(0)}</span>
                 <div>
-                  <a href={source.url} target="_blank" rel="noreferrer nofollow">
-                    {source.title || source.url}
-                  </a>
-                  <small>
-                    Added by {panelMemberName(source.contributedBy)}
-                    {source.retrievedAt ? ` · retrieved ${source.retrievedAt}` : ""}
-                  </small>
+                  <h3>{panelMemberName(vote.panelMember)}</h3>
+                  <p>
+                    Picked <b>{verdictVoteLabel(vote.voteKey, positionMap, participants)}</b>
+                  </p>
                 </div>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="empty">No external sources were recorded.</p>
-        )}
-
-        <details className="record-disclosure">
-          <summary>
-            <span>
-              <strong>Open the full Research Record</strong>
-              <small>{contributions.length} attributed contributions</small>
-            </span>
-            <span aria-hidden="true">+</span>
-          </summary>
-          <div className="research-contributions">
-            {contributions.map((item, index) => (
-              <article className="research-contribution" key={`${item.panelMember}-${index}`}>
-                <div className="record-heading">
-                  <div>
-                    <p>Researcher {String(index + 1).padStart(2, "0")}</p>
-                    <h3>{panelMemberName(item.panelMember)}</h3>
+              </div>
+              <p className="panel-summary">{vote.opinion?.interpretation}</p>
+              {vote.opinion?.decisiveConsiderations?.length ? (
+                <details className="simple-disclosure">
+                  <summary>
+                    <span>Read the full take</span>
+                    <span aria-hidden="true">+</span>
+                  </summary>
+                  <div className="panel-detail-grid">
+                    <div>
+                      <h4>What mattered</h4>
+                      <ul>
+                        {vote.opinion.decisiveConsiderations.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4>Best counterpoint</h4>
+                      <p>{vote.opinion.strongestCounterargument}</p>
+                      <h4>What’s still uncertain</h4>
+                      <p>{vote.opinion.uncertainty}</p>
+                    </div>
                   </div>
-                  <code>{item.model}</code>
-                </div>
-                {item.contribution?.searchQueries?.length ? (
-                  <div className="record-block">
-                    <h4>Search queries</h4>
-                    <ul>
-                      {item.contribution.searchQueries.map((query) => (
-                        <li key={query}>{query}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {item.contribution?.positions?.map((position) => (
-                  <div className="record-block" key={position.participantLabel}>
-                    <h4>Participant {position.participantLabel}</h4>
-                    <p>
-                      <strong>Strongest case:</strong> {position.strongestCase || "None recorded"}
-                    </p>
-                    <p>
-                      <strong>Contrary evidence:</strong>{" "}
-                      {position.contraryEvidence || "None recorded"}
-                    </p>
-                    <p>
-                      <strong>Weaknesses:</strong>{" "}
-                      {position.weaknesses?.join(" ") || "None recorded"}
-                    </p>
-                  </div>
-                ))}
-                {item.contribution?.unresolvedQuestions?.length ? (
-                  <div className="record-block">
-                    <h4>Unresolved questions</h4>
-                    <ul>
-                      {item.contribution.unresolvedQuestions.map((question) => (
-                        <li key={question}>{question}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </details>
+                </details>
+              ) : null}
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="transparency-section" id="transparency">
-        <div className="narrow judgment-section">
-          <p className="section-number">05 / Transparency</p>
-          <h2>Trust, with receipts.</h2>
-          <p className="transparency-intro">
-            Participant names were replaced with A/B/C/D in every model-visible input. The record
-            preserves model identities, prompts, retrieval settings, retries, failures, response
-            IDs, token usage, and estimated cost—never hidden chain of thought.
-          </p>
-          <details className="record-disclosure transparency-disclosure">
+      <section className="result-section result-section-muted" id="sources">
+        <div className="shell">
+          <div className="section-heading-copy">
+            <h2>Sources</h2>
+            <p>
+              All three panelists researched independently, then shared this combined source list.
+            </p>
+          </div>
+          {sources.length ? (
+            <ol className="source-index">
+              {sources.map((source, index) => (
+                <li key={`${source.url}-${index}`}>
+                  <span>{index + 1}</span>
+                  <div>
+                    <a href={source.url} target="_blank" rel="noreferrer nofollow">
+                      {source.title || source.url}
+                    </a>
+                    <small>
+                      Added by {panelMemberName(source.contributedBy)}
+                      {source.retrievedAt ? ` · checked ${source.retrievedAt}` : ""}
+                    </small>
+                  </div>
+                  <span aria-hidden="true">↗</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="empty-state">
+              <p>No outside sources were recorded.</p>
+            </div>
+          )}
+
+          <details className="record-disclosure">
             <summary>
               <span>
-                <strong>Inspect the complete Transparency Record</strong>
-                <small>Exact machine-readable provenance</small>
+                <strong>See all research notes</strong>
+                <small>{contributions.length} separate research passes</small>
               </span>
               <span aria-hidden="true">+</span>
             </summary>
-            <pre className="audit">{JSON.stringify(bet.judgment.transparencyData, null, 2)}</pre>
+            <div className="research-list">
+              {contributions.map((item, index) => (
+                <article className="research-note" key={`${item.panelMember}-${index}`}>
+                  <div className="research-note-heading">
+                    <div>
+                      <span>Research pass {index + 1}</span>
+                      <h3>{panelMemberName(item.panelMember)}</h3>
+                    </div>
+                    <code>{item.model}</code>
+                  </div>
+                  {item.contribution?.searchQueries?.length ? (
+                    <div className="research-block">
+                      <h4>What it searched</h4>
+                      <ul>
+                        {item.contribution.searchQueries.map((query) => (
+                          <li key={query}>{query}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {item.contribution?.positions?.map((position) => (
+                    <div className="research-block" key={position.participantLabel}>
+                      <h4>Take {position.participantLabel}</h4>
+                      <p>
+                        <b>Best case:</b> {position.strongestCase || "None recorded"}
+                      </p>
+                      <p>
+                        <b>Evidence against it:</b> {position.contraryEvidence || "None recorded"}
+                      </p>
+                      <p>
+                        <b>Weak spots:</b> {position.weaknesses?.join(" ") || "None recorded"}
+                      </p>
+                    </div>
+                  ))}
+                  {item.contribution?.unresolvedQuestions?.length ? (
+                    <div className="research-block">
+                      <h4>Open questions</h4>
+                      <ul>
+                        {item.contribution.unresolvedQuestions.map((question) => (
+                          <li key={question}>{question}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
           </details>
-          <a
-            className="report-link"
-            href={`mailto:${supportEmail}?subject=${encodeURIComponent(`Report Judgment ${bet.publicId}`)}`}
-          >
-            Report this Judgment
-          </a>
         </div>
+      </section>
+
+      <section className="shell result-section technical-section" id="details">
+        <div className="section-heading-copy">
+          <h2>Behind the scenes</h2>
+          <p>For anyone who wants to check exactly how this result was made.</p>
+        </div>
+        <div className="privacy-note">
+          <span aria-hidden="true">✓</span>
+          <p>
+            <strong>Names stayed out of the model prompts.</strong> The panel only saw labels A, B,
+            C, and D. We publish model IDs, prompts, searches, retries, token use, and estimated
+            cost—but never hidden chain of thought.
+          </p>
+        </div>
+        <details className="record-disclosure">
+          <summary>
+            <span>
+              <strong>Open the technical record</strong>
+              <small>Exact machine-readable details</small>
+            </span>
+            <span aria-hidden="true">+</span>
+          </summary>
+          <pre className="audit">{JSON.stringify(bet.judgment.transparencyData, null, 2)}</pre>
+        </details>
+        <a
+          className="report-link"
+          href={`mailto:${supportEmail}?subject=${encodeURIComponent(`Report result ${bet.publicId}`)}`}
+        >
+          Report this result
+        </a>
       </section>
     </main>
   );
