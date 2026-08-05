@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(bun add:*)",
+      "Bash(bun install:*)",
+      "Bash(bun run:*)",
+      "Bash(bunx create-next-app@latest:*)",
+      "Bash(bunx husky:*)",
+      "Bash(bunx oxfmt:*)",
+      "Bash(bunx oxlint:*)",
+      "Bash(bunx prisma:*)",
+      "Bash(bunx shadcn@latest:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Skill(context7)",
+      "Bash(curl:*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AGENT=claude /usr/bin/env bash \"$CLAUDE_PROJECT_DIR/.agents/hooks/stop.sh\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  }
+}

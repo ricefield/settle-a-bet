@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BetStatus {
+  OPEN
+  QUEUED
+  EVALUATING
+  PUBLISHED
+  EVALUATION_FAILED
+  CANCELLED
+}
+
+enum PublicationVisibility {
+  PUBLIC
+  HIDDEN
+}
+
+enum EvaluationStatus {
+  QUEUED
+  EVALUATING
+  PUBLISHED
+  FAILED
+}
+
+enum ModelPhase {
+  RESEARCH
+  JUDGMENT
+  SYNTHESIS
+}
+
+enum PanelMember {
+  CLAUDE_OPUS
+  OPENAI_SOL
+  XAI_GROK
+  SYNTHESIZER
+}
+
+enum ModelCallStatus {
+  STARTED
+  SUCCEEDED
+  FAILED
+}
+
+model Bet {
+  id                  String                @id @default(cuid())
+  publicId            String                @unique
+  status              BetStatus             @default(OPEN)
+  visibility          PublicationVisibility @default(PUBLIC)
+  title               String
+  question            String
+  decisionContext     String
+  participantCount    Int
+  stakeUsd            Int
+  organizerTokenHash  String                @unique
+  creatorIpHash       String
+  createdAt           DateTime              @default(now())
+  lockedAt            DateTime?
+  evaluationStartedAt DateTime?
+  publishedAt         DateTime?
+  cancelledAt         DateTime?
+  hiddenAt            DateTime?
+  failureReason       String?
+
+  slots          ParticipantSlot[]
+  evaluationRuns EvaluationRun[]
+  judgment       Judgment?
+
+  @@index([status, createdAt])
+  @@index([visibility, publishedAt])
+}
+
+model ParticipantSlot {
+  id                        String   @id @default(cuid())
+  betId                     String
+  ordinal                   Int
+  label                     String
+  invitationTokenHash       String?  @unique
+  invitationTokenCiphertext String?
+  name                      String?
+  position                  String?
+  submission                String?
+  sourceUrls                Json     @default("[]")
+  submittedAt               DateTime?
+  createdAt                 DateTime @default(now())
+
+  bet Bet @relation(fields: [betId], references: [id], onDelete: Cascade)
+
+  @@unique([betId, ordinal])
+  @@unique([betId, label])
+  @@index([betId, submittedAt])
+}
+
+model EvaluationRun {
+  id                       String           @id @default(cuid())
+  betId                    String
+  status                   EvaluationStatus @default(QUEUED)
+  workflowRunId            String?
+  promptVersion            String
+  aggregationPolicyVersion String
+  researchRecord           Json?
+  researchRecordHash       String?
+  positionMap              Json?
+  verdictKey               String?
+  failureReason            String?
+  createdAt                DateTime         @default(now())
+  startedAt                DateTime?
+  completedAt              DateTime?
+
+  bet                   Bet                    @relation(fields: [betId], references: [id], onDelete: Cascade)
+  modelCalls            ModelCall[]
+  researchContributions ResearchContribution[]
+  judgeVotes            JudgeVote[]
+  judgment              Judgment?
+
+  @@index([betId, createdAt])
+  @@index([status, createdAt])
+}
+
+model ModelCall {
+  id                  String          @id @default(cuid())
+  evaluationRunId     String
+  phase               ModelPhase
+  panelMember         PanelMember
+  attempt             Int
+  status              ModelCallStatus @default(STARTED)
+  requestedModel      String
+  returnedModel       String?
+  requestBody         Json
+  responseBody        Json?
+  providerResponseId  String?
+  inputTokens         Int?
+  outputTokens        Int?
+  totalTokens         Int?
+  estimatedCostMicros Int?
+  error               String?
+  startedAt           DateTime        @default(now())
+  completedAt         DateTime?
+
+  evaluationRun EvaluationRun         @relation(fields: [evaluationRunId], references: [id], onDelete: Cascade)
+  contribution  ResearchContribution?
+  judgeVote     JudgeVote?
+
+  @@unique([evaluationRunId, phase, panelMember, attempt])
+  @@index([evaluationRunId, startedAt])
+}
+
+model ResearchContribution {
+  id              String      @id @default(cuid())
+  evaluationRunId String
+  modelCallId     String      @unique
+  panelMember     PanelMember
+  content         Json
+  searchQueries   Json
+  sources         Json
+  createdAt       DateTime    @default(now())
+
+  evaluationRun EvaluationRun @relation(fields: [evaluationRunId], references: [id], onDelete: Cascade)
+  modelCall      ModelCall     @relation(fields: [modelCallId], references: [id], onDelete: Restrict)
+
+  @@unique([evaluationRunId, panelMember])
+}
+
+model JudgeVote {
+  id                      String      @id @default(cuid())
+  evaluationRunId         String
+  modelCallId             String      @unique
+  panelMember             PanelMember
+  voteKey                 String
+  prevailingPositionGroup String?
+  opinion                 Json
+  createdAt               DateTime    @default(now())
+
+  evaluationRun EvaluationRun @relation(fields: [evaluationRunId], references: [id], onDelete: Cascade)
+  modelCall      ModelCall     @relation(fields: [modelCallId], references: [id], onDelete: Restrict)
+
+  @@unique([evaluationRunId, panelMember])
+}
+
+model Judgment {
+  id               String   @id @default(cuid())
+  betId            String   @unique
+  evaluationRunId  String   @unique
+  verdictKey       String
+  prevailingGroup  String?
+  synthesis        String
+  publicData        Json
+  transparencyData Json
+  createdAt         DateTime @default(now())
+
+  bet           Bet           @relation(fields: [betId], references: [id], onDelete: Restrict)
+  evaluationRun EvaluationRun @relation(fields: [evaluationRunId], references: [id], onDelete: Restrict)
+}
+
+model RateLimitBucket {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime
+  updatedAt   DateTime @updatedAt
+}
+
+model EvaluationBudget {
+  utcDate      String   @id
+  startedCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
+}

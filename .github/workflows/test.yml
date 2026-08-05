@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:password@127.0.0.1:5432/settle_a_bet
+      TOKEN_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+      TOKEN_HASH_PEPPER: test-pepper-at-least-sixteen
+      ADMIN_TAKEDOWN_SECRET: test-admin-secret-at-least-24-chars
+      OPENROUTER_API_KEY: test-key
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run db:generate
+
+      - name: Check formatting
+        run: bun format --check
+
+      - name: Lint
+        run: bun lint
+
+      - name: Typecheck
+        run: bun typecheck
+
+      - name: Run tests
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      - name: Install Playwright Chromium
+        run: node ./node_modules/@playwright/test/cli.js install --with-deps chromium
+
+      - name: Run browser tests
+        run: bun run test:e2e
