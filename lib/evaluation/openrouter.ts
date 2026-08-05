@@ -52,6 +52,16 @@ export type ModelAdapter = {
   runStructured<T>(request: StructuredModelRequest<T>): Promise<StructuredModelResult<T>>;
 };
 
+export class OpenRouterResponseError extends ServiceUnavailableError {
+  constructor(
+    message: string,
+    public readonly returnedModel: string,
+    public readonly audit: ModelCallAudit,
+  ) {
+    super(message);
+  }
+}
+
 function textContent(content: string | unknown[]): string {
   if (typeof content === "string") return content;
   return content
@@ -61,6 +71,33 @@ function textContent(content: string | unknown[]): string {
       return [];
     })
     .join("");
+}
+
+const unsupportedJsonSchemaKeywords = new Set([
+  "default",
+  "exclusiveMaximum",
+  "exclusiveMinimum",
+  "format",
+  "maxItems",
+  "maxLength",
+  "maxProperties",
+  "maximum",
+  "minItems",
+  "minLength",
+  "minProperties",
+  "minimum",
+  "multipleOf",
+  "pattern",
+]);
+
+function omitUnsupportedJsonSchemaKeywords(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(omitUnsupportedJsonSchemaKeywords);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !unsupportedJsonSchemaKeywords.has(key))
+      .map(([key, entry]) => [key, omitUnsupportedJsonSchemaKeywords(entry)]),
+  );
 }
 
 export function createOpenRouterAdapter({
@@ -82,7 +119,7 @@ export function createOpenRouterAdapter({
           json_schema: {
             name: request.schemaName,
             strict: true,
-            schema: z.toJSONSchema(request.schema),
+            schema: omitUnsupportedJsonSchemaKeywords(z.toJSONSchema(request.schema)),
           },
         },
         provider: { require_parameters: true },
@@ -119,9 +156,33 @@ export function createOpenRouterAdapter({
       }
       const raw = await response.json();
       const parsed = responseSchema.parse(raw);
+      const inputTokens = parsed.usage.input_tokens ?? parsed.usage.prompt_tokens;
+      const outputTokens = parsed.usage.output_tokens ?? parsed.usage.completion_tokens;
+      const webSearchCostMicros = (parsed.usage.server_tool_use?.web_search_requests ?? 0) * 5_000;
+      const audit: ModelCallAudit = {
+        providerResponseId: parsed.id,
+        requestBody: body,
+        responseBody: {
+          id: parsed.id,
+          model: parsed.model,
+          choices: parsed.choices.map((choice) => ({
+            finishReason: choice.finish_reason,
+            content: choice.message.content,
+            annotations: choice.message.annotations,
+          })),
+          usage: parsed.usage,
+        },
+        inputTokens,
+        outputTokens,
+        totalTokens: parsed.usage.total_tokens,
+        estimatedCostMicros:
+          estimateCostMicros(request.model, inputTokens, outputTokens) + webSearchCostMicros,
+      };
       if (parsed.model !== request.model) {
-        throw new ServiceUnavailableError(
+        throw new OpenRouterResponseError(
           `OpenRouter returned ${parsed.model} instead of required model ${request.model}`,
+          parsed.model,
+          audit,
         );
       }
       const content = textContent(parsed.choices[0].message.content);
@@ -129,34 +190,27 @@ export function createOpenRouterAdapter({
       try {
         decoded = JSON.parse(content);
       } catch {
-        throw new ServiceUnavailableError("OpenRouter returned malformed structured output");
+        throw new OpenRouterResponseError(
+          `OpenRouter returned malformed structured output (finish_reason=${parsed.choices[0].finish_reason ?? "unknown"}, content_length=${content.length})`,
+          parsed.model,
+          audit,
+        );
       }
-      const value = request.schema.parse(decoded);
-      const inputTokens = parsed.usage.input_tokens ?? parsed.usage.prompt_tokens;
-      const outputTokens = parsed.usage.output_tokens ?? parsed.usage.completion_tokens;
-      const webSearchCostMicros = (parsed.usage.server_tool_use?.web_search_requests ?? 0) * 5_000;
+      let value: T;
+      try {
+        value = request.schema.parse(decoded);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : "unknown validation failure";
+        throw new OpenRouterResponseError(
+          `OpenRouter returned invalid structured output: ${detail}`,
+          parsed.model,
+          audit,
+        );
+      }
       return {
         value,
         returnedModel: parsed.model,
-        audit: {
-          providerResponseId: parsed.id,
-          requestBody: body,
-          responseBody: {
-            id: parsed.id,
-            model: parsed.model,
-            choices: parsed.choices.map((choice) => ({
-              finishReason: choice.finish_reason,
-              content: choice.message.content,
-              annotations: choice.message.annotations,
-            })),
-            usage: parsed.usage,
-          },
-          inputTokens,
-          outputTokens,
-          totalTokens: parsed.usage.total_tokens,
-          estimatedCostMicros:
-            estimateCostMicros(request.model, inputTokens, outputTokens) + webSearchCostMicros,
-        },
+        audit,
       };
     },
   };

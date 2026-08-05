@@ -148,12 +148,28 @@ export async function succeedModelCall(
   });
 }
 
-export async function failModelCall(callId: string, error: unknown) {
+export async function failModelCall(
+  callId: string,
+  error: unknown,
+  response?: { returnedModel: string; audit: ModelCallAudit },
+) {
   await getPrismaClient().modelCall.update({
     where: { id: callId },
     data: {
       status: "FAILED",
       error: error instanceof Error ? error.message.slice(0, 2_000) : "Unknown provider failure",
+      ...(response
+        ? {
+            returnedModel: response.returnedModel,
+            requestBody: json(response.audit.requestBody),
+            responseBody: json(response.audit.responseBody),
+            providerResponseId: response.audit.providerResponseId,
+            inputTokens: response.audit.inputTokens,
+            outputTokens: response.audit.outputTokens,
+            totalTokens: response.audit.totalTokens,
+            estimatedCostMicros: response.audit.estimatedCostMicros,
+          }
+        : {}),
       completedAt: new Date(),
     },
   });

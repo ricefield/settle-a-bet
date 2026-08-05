@@ -8,8 +8,13 @@ import {
   voteKey,
 } from "@/lib/bet/domain";
 import { getPanelModels, type PanelModel } from "@/lib/evaluation/models";
-import { createOpenRouterAdapter, type StructuredModelRequest } from "@/lib/evaluation/openrouter";
+import {
+  createOpenRouterAdapter,
+  OpenRouterResponseError,
+  type StructuredModelRequest,
+} from "@/lib/evaluation/openrouter";
 import { judgmentPrompt, researchPrompt, synthesisPrompt } from "@/lib/evaluation/prompts";
+import { stampResearchSources } from "@/lib/evaluation/research";
 import {
   judicialOpinionSchema,
   researchContributionSchema,
@@ -71,7 +76,13 @@ async function callWithRetries<T>({
       return { ...result, modelCallId };
     } catch (error) {
       lastError = error;
-      await db.evaluations.failModelCall(modelCallId, error);
+      await db.evaluations.failModelCall(
+        modelCallId,
+        error,
+        error instanceof OpenRouterResponseError
+          ? { returnedModel: error.returnedModel, audit: error.audit }
+          : undefined,
+      );
     }
   }
   throw lastError instanceof Error
@@ -114,12 +125,13 @@ export async function researchStep(
       system: prompt.system,
       user: prompt.user,
       reasoningEffort: "low",
-      maxTokens: 1_800,
+      maxTokens: 3_200,
       webSearch: true,
     },
   });
+  const contribution = stampResearchSources(result.value, new Date());
   const labels = input.participants.map((participant) => participant.label).sort();
-  const researchedLabels = result.value.positions
+  const researchedLabels = contribution.positions
     .map((position) => position.participantLabel)
     .sort();
   if (JSON.stringify(labels) !== JSON.stringify(researchedLabels)) {
@@ -129,13 +141,13 @@ export async function researchStep(
     evaluationRunId: input.evaluationRunId,
     modelCallId: result.modelCallId,
     panelMember: panel.member,
-    contribution: result.value,
+    contribution,
   });
   return {
     panelMember: panel.member,
     model: panel.model,
     modelCallId: result.modelCallId,
-    contribution: result.value,
+    contribution,
   };
 }
 
