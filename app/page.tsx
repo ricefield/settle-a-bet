@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PanelModelLogo } from "@/components/PanelModelLogo";
 import { getBetModule } from "@/lib/bet";
 
 export const dynamic = "force-dynamic";
@@ -41,21 +42,21 @@ export default async function HomePage() {
           </div>
           <div className="panel-models">
             <div>
-              <span>C</span>
+              <PanelModelLogo member="CLAUDE_OPUS" />
               <p>
                 <b>Claude</b>
                 <small>Independent research</small>
               </p>
             </div>
             <div>
-              <span>S</span>
+              <PanelModelLogo member="OPENAI_SOL" />
               <p>
                 <b>Sol</b>
                 <small>Independent research</small>
               </p>
             </div>
             <div>
-              <span>G</span>
+              <PanelModelLogo member="XAI_GROK" />
               <p>
                 <b>Grok</b>
                 <small>Independent research</small>

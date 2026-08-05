@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PanelModelLogo } from "@/components/PanelModelLogo";
 import { getBetModule } from "@/lib/bet";
 import { AppError } from "@/lib/errors";
 import {
@@ -190,7 +191,7 @@ export default async function ResultPage({ params }: { params: Promise<{ publicI
           <ul className="vote-list">
             {votes.map((vote, index) => (
               <li key={`${vote.panelMember}-${index}`}>
-                <span className="model-avatar">{panelMemberName(vote.panelMember).charAt(0)}</span>
+                <PanelModelLogo member={vote.panelMember} />
                 <div>
                   <strong>{panelMemberName(vote.panelMember)}</strong>
                   <small>Picked</small>
@@ -304,7 +305,7 @@ export default async function ResultPage({ params }: { params: Promise<{ publicI
           {votes.map((vote, index) => (
             <article className="panel-take" key={`${vote.panelMember}-${index}`}>
               <div className="panel-take-heading">
-                <span className="model-avatar">{panelMemberName(vote.panelMember).charAt(0)}</span>
+                <PanelModelLogo member={vote.panelMember} />
                 <div>
                   <h3>{panelMemberName(vote.panelMember)}</h3>
                   <p>

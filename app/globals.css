@@ -327,17 +327,30 @@ a:focus-visible {
   padding: 15px 0;
   border-bottom: 1px solid var(--line);
 }
-.panel-models > div > span,
-.model-avatar {
+.model-logo {
   width: 34px;
   height: 34px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--blue-dark);
-  background: var(--blue-soft);
-  font-size: 0.78rem;
-  font-weight: 850;
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+.model-logo svg {
+  width: 18px;
+  height: 18px;
+}
+.model-logo-claude {
+  color: #d97757;
+  background: #f9eee9;
+}
+.model-logo-openai {
+  color: #111827;
+  background: #eef0f2;
+}
+.model-logo-grok {
+  color: #050505;
+  background: #f0f0f0;
 }
 .panel-models p {
   display: grid;
