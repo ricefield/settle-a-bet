@@ -16,6 +16,14 @@ describe("OpenRouter adapter", () => {
       expect(body.model).toBe("openai/gpt-5.6-sol");
       expect(body.models).toBeUndefined();
       expect(body.tools).toHaveLength(1);
+      expect(body.tools[0]).toEqual({
+        type: "openrouter:web_search",
+        parameters: {
+          max_results: 5,
+          max_total_results: 5,
+          search_context_size: "low",
+        },
+      });
       return new Response(
         JSON.stringify({
           id: "response-1",

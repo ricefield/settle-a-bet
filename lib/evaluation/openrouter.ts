@@ -92,7 +92,6 @@ export function createOpenRouterAdapter({
                 {
                   type: "openrouter:web_search",
                   parameters: {
-                    engine: "exa",
                     max_results: 5,
                     max_total_results: 5,
                     search_context_size: "low",
